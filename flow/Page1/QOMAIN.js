@@ -1485,7 +1485,6 @@ router.post('/QO/getReqList', async (req, res) => {
               CASE UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N''))))
                 WHEN N'COMPLETE' THEN 6
                 WHEN N'WAIT APPROVE' THEN 5
-                WHEN N'WAIT APPROVE REPORT' THEN 5
                 WHEN N'WAIT ANALYSIS' THEN 4
                 WHEN N'RECEIVE SAMPLE' THEN 3
                 WHEN N'SEND SAMPLE' THEN 2
@@ -1620,12 +1619,15 @@ router.post('/QO/listItem', async (req, res) => {
       'W1_2',
       'W2_1',
       'W2_2',
+      'W2_W1_1',
+      'W2_W1_2',
       'W3_1',
       'W3_2',
       'Characteristic',
       'CTime_400',
       'CTime_300',
       'CPerformance',
+      'RemarkItemApprover',
     ];
     const instrumentOnlyColumns = new Set(['UserAnalysis', 'AnalysisDate', ...optionalInstrumentColumns]);
     const targetTableNames = [...new Set(dataRow.map((row) => _qoInstrumentTableName(row.Instrument)))];
@@ -1705,6 +1707,9 @@ router.post('/QO/listItem', async (req, res) => {
             FROM ${instrumentTable} target
             WHERE ${duplicateConditions}
           );
+
+        IF @@ROWCOUNT = 0
+          RAISERROR('Instrument list item insert skipped for Id: ${escapedId}, table: ${instrumentTableName}', 16, 1);
       `;
     }
 
@@ -2115,12 +2120,15 @@ router.post('/QO/InstrumentData', async (req, res) => {
       'W1_2',
       'W2_1',
       'W2_2',
+      'W2_W1_1',
+      'W2_W1_2',
       'W3_1',
       'W3_2',
       'Characteristic',
       'CTime_400',
       'CTime_300',
       'CPerformance',
+      'RemarkItemApprover',
     ];
     const optionalColumnsByName = await _loadQoInstrumentOptionalColumns([tableName], optionalResultColumns);
     const optionalColumnsForTable = optionalColumnsByName.get(tableName) || new Set();
@@ -2215,6 +2223,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       'W1_2',
       'W2_1',
       'W2_2',
+      'W2_W1_1',
+      'W2_W1_2',
       'W3_1',
       'W3_2',
       'Characteristic',
@@ -2279,12 +2289,16 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
     const w12 = req.body.W1_2;
     const w21 = req.body.W2_1;
     const w22 = req.body.W2_2;
+    const w2W11 = req.body.W2_W1_1;
+    const w2W12 = req.body.W2_W1_2;
     const w31 = req.body.W3_1;
     const w32 = req.body.W3_2;
     const w11Sql = w11 === '' || w11 === null || w11 === undefined ? 'NULL' : `N'${_esc(w11)}'`;
     const w12Sql = w12 === '' || w12 === null || w12 === undefined ? 'NULL' : `N'${_esc(w12)}'`;
     const w21Sql = w21 === '' || w21 === null || w21 === undefined ? 'NULL' : `N'${_esc(w21)}'`;
     const w22Sql = w22 === '' || w22 === null || w22 === undefined ? 'NULL' : `N'${_esc(w22)}'`;
+    const w2W11Sql = w2W11 === '' || w2W11 === null || w2W11 === undefined ? 'NULL' : `N'${_esc(w2W11)}'`;
+    const w2W12Sql = w2W12 === '' || w2W12 === null || w2W12 === undefined ? 'NULL' : `N'${_esc(w2W12)}'`;
     const w31Sql = w31 === '' || w31 === null || w31 === undefined ? 'NULL' : `N'${_esc(w31)}'`;
     const w32Sql = w32 === '' || w32 === null || w32 === undefined ? 'NULL' : `N'${_esc(w32)}'`;
     const characteristic = req.body.Characteristic;
@@ -2318,6 +2332,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       optionalColumnsForTable.has('W1_2') ? `[W1_2] = ${w12Sql}` : '',
       optionalColumnsForTable.has('W2_1') ? `[W2_1] = ${w21Sql}` : '',
       optionalColumnsForTable.has('W2_2') ? `[W2_2] = ${w22Sql}` : '',
+      optionalColumnsForTable.has('W2_W1_1') ? `[W2_W1_1] = ${w2W11Sql}` : '',
+      optionalColumnsForTable.has('W2_W1_2') ? `[W2_W1_2] = ${w2W12Sql}` : '',
       optionalColumnsForTable.has('W3_1') ? `[W3_1] = ${w31Sql}` : '',
       optionalColumnsForTable.has('W3_2') ? `[W3_2] = ${w32Sql}` : '',
       optionalColumnsForTable.has('Characteristic') ? `[Characteristic] = ${characteristicSql}` : '',
@@ -3412,6 +3428,7 @@ router.post('/QO/KPIItemByCustomer', async (req, res) => {
       SELECT DISTINCT LTRIM(RTRIM([CustFull])) AS [CustFull]
       FROM [QO].[dbo].[MasterPattern]
       WHERE LTRIM(RTRIM(ISNULL([CustFull], N''))) <> N''
+      AND LTRIM(RTRIM(ISNULL([CustFull], N''))) <> N'Master'
       ORDER BY LTRIM(RTRIM([CustFull]))
     `;
     const masterCustomerDb = await mssql.qurey(masterCustomerQuery);
@@ -3425,16 +3442,33 @@ router.post('/QO/KPIItemByCustomer', async (req, res) => {
     }
 
     const requestQuery = `
+      WITH CompleteReqNo AS (
+        SELECT [ReqNo]
+        FROM [QO].[dbo].[Request]
+        GROUP BY [ReqNo]
+        HAVING
+          SUM(CASE
+            WHEN UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL') THEN 1
+            ELSE 0
+          END) > 0
+          AND SUM(CASE
+            WHEN UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
+             AND UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) <> N'COMPLETE' THEN 1
+            ELSE 0
+          END) = 0
+      )
       SELECT
-        [CustFull],
-        [ReceivedDate],
-        [Cost]
-      FROM [QO].[dbo].[Request]
-      WHERE YEAR([ReceivedDate]) = ${year}
-        AND [ReceivedDate] IS NOT NULL
-        AND UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
-        AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
-        AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
+        R.[CustFull],
+        R.[ReceivedDate],
+        R.[Cost]
+      FROM [QO].[dbo].[Request] R
+      INNER JOIN CompleteReqNo C
+        ON C.[ReqNo] = R.[ReqNo]
+      WHERE YEAR(R.[ReceivedDate]) = ${year}
+        AND R.[ReceivedDate] IS NOT NULL
+        AND UPPER(LTRIM(RTRIM(ISNULL(R.[RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
+        AND UPPER(LTRIM(RTRIM(ISNULL(R.[SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
+        AND UPPER(LTRIM(RTRIM(ISNULL(R.[ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
     `;
 
     const db = await mssql.qurey(requestQuery);
@@ -4015,6 +4049,8 @@ const QO_APPROVAL_EDITABLE_COLUMNS = [
   'W1_2',
   'W2_1',
   'W2_2',
+  'W2_W1_1',
+  'W2_W1_2',
   'W3_1',
   'W3_2',
   'Characteristic',
