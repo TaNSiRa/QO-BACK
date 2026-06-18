@@ -43,7 +43,8 @@ router.post("/QO/CreateReport", async (req, res) => {
 
     const groups = qoGroupBy(reportItems, (item) => (item.SampleCode || item.ReqNo || '').toString());
     const first = reportItems[0];
-    const reportPath = qoBuildReportPath(first);
+    const reportFileBase = qoResolveReportFileBase(req.body, reportItems, first);
+    const reportPath = qoBuildReportPath(first, reportFileBase);
     fs.mkdirSync(path.dirname(reportPath), { recursive: true });
 
     const doc = new PDFDocument({ margin: 18, size: "A4", layout: "landscape" });
@@ -118,7 +119,29 @@ function qoGroupBy(items, keyOf) {
   return groups;
 }
 
-function qoBuildReportPath(first) {
+function qoResolveReportFileBase(body, reportItems, first) {
+  const explicitName = (body.ReportFileName || body.FileName || '').toString().trim();
+  if (explicitName) return explicitName;
+
+  const mode = (body.ReportMode || '').toString().trim().toUpperCase();
+  const requestSampleCode = (body.SampleCode || '').toString().trim();
+  if (mode === 'SAMPLECODE') return requestSampleCode || first.SampleCode || first.ReqNo || 'QO-Report';
+  if (mode === 'REQNO') return first.ReqNo || requestSampleCode || first.SampleCode || 'QO-Report';
+
+  if (requestSampleCode) return requestSampleCode;
+
+  const sampleCodes = new Set(
+    (reportItems || [])
+      .map((item) => (item.SampleCode || '').toString().trim())
+      .filter(Boolean)
+  );
+
+  return sampleCodes.size === 1
+    ? [...sampleCodes][0]
+    : first.ReqNo || first.SampleCode || 'QO-Report';
+}
+
+function qoBuildReportPath(first, fileBase) {
   const date = qoParseDate(first.ReportApproveDate || first.SamplingDate || new Date());
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const base = 'C:\\AutomationProject\\QO\\Report';
@@ -128,7 +151,7 @@ function qoBuildReportPath(first) {
     String(date.getFullYear()),
     monthNames[date.getMonth()]
   );
-  const fileName = `${qoSafePathSegment(first.ReqNo || 'QO-Report')}-${Date.now()}.pdf`;
+  const fileName = `${qoSafePathSegment(fileBase || first.ReqNo || 'QO-Report')}.pdf`;
   return path.join(folder, fileName);
 }
 
