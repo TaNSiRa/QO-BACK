@@ -20,7 +20,6 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 // app.use(express.limit('10M'));
 app.use(cors())
 app.use("/", require("./api"))
-app.use('/uploads/spot', express.static('C:\\AutomationProject\\SOC\\Spot picture'));
 
 
 app.listen(port, () => {
