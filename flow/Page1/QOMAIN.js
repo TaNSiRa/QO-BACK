@@ -1457,7 +1457,12 @@ router.post('/QO/getReqList', async (req, res) => {
     const whereClause = rowConditions.length ? `WHERE ${rowConditions.join('\n      AND ')}` : '';
     const havingClause = groupConditions.length ? `WHERE ${groupConditions.join('\n      AND ')}` : '';
     const query = `
-      WITH RequestGroup AS (
+      WITH FilteredRequest AS (
+        SELECT *
+        FROM [QO].[dbo].[Request]
+        ${whereClause}
+      ),
+      RequestGroup AS (
         SELECT
           [ReqNo],
           MAX([CustFull]) AS [CustFull],
@@ -1466,23 +1471,48 @@ router.post('/QO/getReqList', async (req, res) => {
           MAX([Receiver]) AS [Receiver],
           MAX([AnalysisDue]) AS [DueDateRaw],
           MAX([ReportApproveDate]) AS [ReportApproveDate],
-          MAX([RequestStatus]) AS [RequestStatus]
-        FROM [QO].[dbo].[Request]
-        ${whereClause}
+          MAX([RequestStatus]) AS [FallbackRequestStatus]
+        FROM FilteredRequest
         GROUP BY [ReqNo]
+      ),
+      RequestStatusRank AS (
+        SELECT
+          [ReqNo],
+          [RequestStatus],
+          ROW_NUMBER() OVER (
+            PARTITION BY [ReqNo]
+            ORDER BY
+              CASE UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N''))))
+                WHEN N'COMPLETE' THEN 6
+                WHEN N'WAIT APPROVE' THEN 5
+                WHEN N'WAIT APPROVE REPORT' THEN 5
+                WHEN N'WAIT ANALYSIS' THEN 4
+                WHEN N'RECEIVE SAMPLE' THEN 3
+                WHEN N'SEND SAMPLE' THEN 2
+                WHEN N'WAIT SAMPLE' THEN 1
+                WHEN N'CANCEL' THEN 0
+                WHEN N'REJECT' THEN 0
+                ELSE 0
+              END DESC,
+              [RequestStatus] ASC
+          ) AS [StatusRowNo]
+        FROM FilteredRequest
       )
       SELECT
-        [ReqNo],
-        [CustFull],
-        [SamplingDate],
-        [ReceivedDate],
-        [Receiver],
-        [DueDateRaw] AS [AnalysisDue],
-        [ReportApproveDate],
-        [RequestStatus]
+        RequestGroup.[ReqNo],
+        RequestGroup.[CustFull],
+        RequestGroup.[SamplingDate],
+        RequestGroup.[ReceivedDate],
+        RequestGroup.[Receiver],
+        RequestGroup.[DueDateRaw] AS [AnalysisDue],
+        RequestGroup.[ReportApproveDate],
+        COALESCE(RequestStatusRank.[RequestStatus], RequestGroup.[FallbackRequestStatus]) AS [RequestStatus]
       FROM RequestGroup
+      LEFT JOIN RequestStatusRank
+        ON RequestStatusRank.[ReqNo] = RequestGroup.[ReqNo]
+       AND RequestStatusRank.[StatusRowNo] = 1
       ${havingClause}
-      ORDER BY [ReqNo] DESC;
+      ORDER BY RequestGroup.[ReqNo] DESC;
     `;
 
     const db = await mssql.qurey(query);
