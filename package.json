@@ -1,0 +1,29 @@
+{
+  "name": "js_master_v1",
+  "version": "1.0.0",
+  "description": "master",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "distrotion",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "b64-to-blob": "^1.2.19",
+    "body-parser": "^1.20.3",
+    "canvas": "^3.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongodb": "^4.1.1",
+    "mongoose": "^6.0.5",
+    "mssql": "^7.2.1",
+    "multer": "^2.1.1",
+    "nodemon": "^1.3.3",
+    "path": "^0.12.7",
+    "pdf-poppler": "^0.2.3",
+    "pdfjs-dist": "^5.4.394",
+    "pdfkit": "^0.17.2",
+    "request": "^2.88.2"
+  }
+}

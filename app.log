@@ -1,0 +1,592 @@
+{
+  "timestamp": "2026-02-27 14:13:44",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob:\n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACB-260004-pH',\n[ReqCode] = N'ACB',\n[UserListJob] = N'Vipharat',\n[ListJobDate] = N'2026-02-27T14:13:44.840Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2216';\n      \n",
+  "data": {}
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 14:15:51",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260003-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T14:15:50.999Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2091';\n      \n"
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 14:17:03",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260003-pH',[ReqCode] = N'ACR',[UserListJob] = N'K.SIRAWIT',[ListJobDate] = N'2026-02-27T14:17:03.484Z',[ItemStatus] = N'LIST ITEM',[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2091';\n      \n"
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:03:35",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:03:35.589Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:03:35.589Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n"
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:05:59",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:05:59.833Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:05:59.833Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n"
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:13:15",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:13:15.459Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:13:15.459Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n"
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:15:30",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:15:30.495Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:15:30.495Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n"
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:24:32",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:24:32.488Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:24:32.488Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:26:33",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:26:33.573Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:26:33.573Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:28:10",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:28:10.473Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:28:10.473Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:37:41",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:37:41.036Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:39:57",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:39:57.514Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 15:40:03",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T15:40:03.245Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-02-27 16:54:09",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T16:54:09.641Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2229';\n      \n\n      UPDATE [WWT].[dbo].[Request]\n      SET [JobCode] = N'JOB-ENV-ACR-260002-pH',\n[ReqCode] = N'ACR',\n[UserListJob] = N'K.SIRAWIT',\n[ListJobDate] = N'2026-02-27T16:54:09.641Z',\n[ItemStatus] = N'LIST ITEM',\n[JobStatus] = N'IN PROCESS'\n      WHERE ID = '2242';\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 11:05:54",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:05:54.910Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '245';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 245', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:05:54.910Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '246';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 246', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:05:54.910Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '247';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 247', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:05:54.910Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '248';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 248', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:05:54.910Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '249';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 249', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 11:12:42",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:12:42.924Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '245';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 245', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:12:42.924Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '246';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 246', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:12:42.924Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '247';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 247', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:12:42.924Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '248';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 248', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:12:42.924Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '249';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 249', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 11:13:08",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '255';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 255', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '256';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 256', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '257';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 257', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '258';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 258', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '259';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 259', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '250';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 250', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '251';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 251', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '252';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 252', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '253';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 253', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:08.052Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '254';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 254', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 11:13:22",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '230';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 230', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '231';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 231', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '232';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 232', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '233';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 233', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T11:13:22.649Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '234';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 234', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 13:48:43",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:48:43.437Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:48:43.437Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:48:43.437Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:48:43.437Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:48:43.437Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 13:49:59",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:49:59.832Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:49:59.832Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:49:59.832Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:49:59.832Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:49:59.832Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 13:50:46",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:50:46.177Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:50:46.177Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:50:46.177Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:50:46.177Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:50:46.177Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-02 13:54:45",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:54:45.430Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:54:45.430Z',\n[ItemStatus] = N'LIST RECHECK',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:54:45.430Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:54:45.430Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-02T13:54:45.430Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:22:44",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:22:44.686Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:22:44.686Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:22:44.686Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:22:44.686Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:22:44.686Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:34:02",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:34:02.791Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '260';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 260', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:34:02.791Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '261';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 261', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:34:02.791Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '262';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 262', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:34:02.791Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '263';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 263', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:34:02.791Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '264';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 264', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:36:07",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:36:07.638Z',\n[ItemStatus] = N'LIST RECHECK',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '255';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 255', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:55:32",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:32.911Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '285';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 285', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:32.911Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '286';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 286', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:32.911Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '287';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 287', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:32.911Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '288';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 288', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:32.911Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '289';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 289', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:55:39",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:39.241Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '290';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 290', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:39.241Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '291';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 291', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:39.241Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '292';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 292', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:39.241Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '293';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 293', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:39.241Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '294';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 294', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:55:46",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:46.841Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '295';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 295', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:46.841Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '296';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 296', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:46.841Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '297';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 297', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:46.841Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '298';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 298', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:55:46.841Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '299';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 299', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 16:58:58",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T16:58:58.332Z',\n[ItemStatus] = N'LIST RECHECK',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '296';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 296', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 17:02:13",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:02:13.683Z',\n[ItemStatus] = N'LIST RECHECK',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '297';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 297', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 17:10:08",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:10:08.208Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '295';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 295', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:10:08.208Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '296';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 296', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:10:08.208Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '297';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 297', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:10:08.208Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '298';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 298', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:10:08.208Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '299';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 299', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 17:29:56",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:29:56.313Z',\n[ItemStatus] = N'LIST RECHECK',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '296';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 296', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-08 17:33:28",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-08T17:33:28.390Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '296';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 296', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-23 15:11:24",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-23T15:11:24.620Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '318';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 318', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 11:37:43",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T11:37:43.139Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '360';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 360', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T11:37:43.139Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '361';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 361', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T11:37:43.139Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '362';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 362', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T11:37:43.139Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '363';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 363', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T11:37:43.139Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '364';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 364', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 12:23:57",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T12:23:57.124Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '318';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 318', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T12:23:57.124Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '315';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 315', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T12:23:57.124Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '316';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 316', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T12:23:57.124Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '317';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 317', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 12:25:24",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T12:25:24.751Z',\n[ItemStatus] = N'LIST ITEM'\n      WHERE ID = '318';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 318', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 13:15:41",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T13:15:41.498Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '318';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 318', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 13:22:34",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T13:22:34.129Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '318';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 318', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 15:36:47",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T15:36:47.423Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '360';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 360', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 16:59:10",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T16:59:10.688Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '360';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 360', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:05:49",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:05:49.447Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '360';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 360', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:36:39",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:36:39.706Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '365';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 365', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:36:39.706Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:36:39.706Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '367';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 367', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:36:39.706Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '368';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 368', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:36:39.706Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '369';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 369', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:39:13",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:39:13.723Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:53:55",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:53:55.109Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:56:30",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:56:30.172Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:57:22",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:57:22.771Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:58:45",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:58:45.883Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 17:59:41",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T17:59:41.686Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '366';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 366', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 21:09:52",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:09:52.372Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '370';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 370', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:09:52.372Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '371';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 371', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:09:52.372Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '372';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 372', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:09:52.372Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '373';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 373', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:09:52.372Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '374';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 374', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 21:11:16",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:11:16.481Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '371';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 371', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 21:14:00",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:14:00.211Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '371';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 371', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 21:15:46",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:15:46.511Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '371';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 371', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 21:25:57",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:25:57.829Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '370';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 370', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:25:57.829Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '371';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 371', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:25:57.829Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '372';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 372', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:25:57.829Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '373';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 373', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:25:57.829Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '374';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 374', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-04-29 21:32:15",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:32:15.521Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '370';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 370', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:32:15.521Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '371';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 371', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:32:15.521Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '372';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 372', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:32:15.521Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '373';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 373', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-04-29T21:32:15.521Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '374';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 374', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-05 15:15:07",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-05T15:15:07.789Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '370';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 370', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-05 19:01:27",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-05T19:01:27.077Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '370';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 370', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-07 13:40:40",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:40:40.003Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '415';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 415', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:40:40.003Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '416';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 416', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:40:40.003Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '417';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 417', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:40:40.003Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '418';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 418', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:40:40.003Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '419';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 419', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-07 13:42:57",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:42:57.903Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '416';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 416', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T13:42:57.903Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '417';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 417', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-07 14:02:38",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Natvaree',\n[ListItemDate] = N'2026-05-07T14:02:38.047Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '417';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 417', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-07 15:00:19",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:00:19.658Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '420';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 420', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:00:19.658Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '421';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 421', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:00:19.658Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '422';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 422', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:00:19.658Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '423';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 423', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:00:19.658Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '424';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 424', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-07 15:05:39",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:05:39.192Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '425';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 425', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:05:39.192Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '426';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 426', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:05:39.192Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '427';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 427', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:05:39.192Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '428';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 428', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:05:39.192Z',\n[ItemStatus] = N'LIST ITEM',\n[ReqStatus] = N'WAIT ANALYSIS'\n      WHERE ID = '429';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 429', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-07 15:08:39",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:08:39.235Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '426';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 426', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-07T15:08:39.235Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '427';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 427', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-21 14:32:33",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:32:33.258Z',\n[ItemStatus] = N'LIST RECHECK'\n      WHERE ID = '471';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 471', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-21 14:53:13",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:53:13.852Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '470';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 470', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:53:13.852Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '471';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 471', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:53:13.852Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '472';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 472', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:53:13.852Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '473';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 473', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:53:13.852Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '474';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 474', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-05-21 14:58:45",
+  "level": "INFO",
+  "message": "Generated Update Queries for listNewJob",
+  "data": {
+    "Queries": "\n    BEGIN TRANSACTION;\n    BEGIN TRY\n      \n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:58:45.000Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '470';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 470', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:58:45.000Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '471';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 471', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:58:45.000Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '472';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 472', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:58:45.000Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '473';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 473', 16, 1);\n      \n\n      UPDATE [SOC].[dbo].[Request]\n      SET [UserListItem] = N'Sirawit',\n[ListItemDate] = N'2026-05-21T14:58:45.000Z',\n[ItemStatus] = N'LIST RECONFIRM'\n      WHERE ID = '474';\n      IF @@ROWCOUNT = 0\n        RAISERROR('Update failed for ID: 474', 16, 1);\n      \n\n      COMMIT TRANSACTION;\n    END TRY\n    BEGIN CATCH\n      ROLLBACK TRANSACTION;\n      THROW;\n    END CATCH\n    "
+  }
+}
+--------------------------------------------------
