@@ -1137,6 +1137,15 @@ router.post('/QO/ReportApproveReconfirmItem', async (req, res) => {
       return res.status(400).json({ message: 'Missing Id' });
     }
 
+    // Cooling curve items all come from one measurement/graph, so approving or
+    // rejecting a reconfirm must apply to every cooling item of that sample no,
+    // not just the single clicked row (mirrors ReportReconfirmItem).
+    const isCoolingCurve = instrument.toUpperCase() === 'COOLING CURVE MEASUREMENT';
+    const requestTargetWhere = isCoolingCurve && sampleCode
+      ? `CONVERT(NVARCHAR(4000), [SampleCode]) = N'${_esc(sampleCode)}'
+          AND UPPER(LTRIM(RTRIM(ISNULL([Instrument], N'')))) = N'COOLING CURVE MEASUREMENT'`
+      : `CONVERT(NVARCHAR(4000), [Id]) = N'${_esc(requestId)}'`;
+
     let actionQuery = '';
 
     if (approve) {
@@ -1167,12 +1176,16 @@ router.post('/QO/ReportApproveReconfirmItem', async (req, res) => {
       const instrumentTableName = _qoInstrumentTableName(instrument);
       await _loadQoInstrumentTableMeta([instrumentTableName], deleteColumns);
       const instrumentTable = _qoInstrumentTableFromName(instrumentTableName);
-      const deleteConditions = deleteColumns
-        .map((column) => {
-          const identifier = _sqlIdentifier(column);
-          return `ISNULL(CONVERT(NVARCHAR(4000), ${identifier}), N'') = N'${_esc(req.body[column] || '')}'`;
-        })
-        .join('\n            AND ');
+      // Cooling table only holds cooling records, so SampleCode alone selects
+      // every cooling item of the sample; other instruments stay per-item.
+      const deleteConditions = isCoolingCurve && sampleCode
+        ? `ISNULL(CONVERT(NVARCHAR(4000), ${_sqlIdentifier('SampleCode')}), N'') = N'${_esc(sampleCode)}'`
+        : deleteColumns
+          .map((column) => {
+            const identifier = _sqlIdentifier(column);
+            return `ISNULL(CONVERT(NVARCHAR(4000), ${identifier}), N'') = N'${_esc(req.body[column] || '')}'`;
+          })
+          .join('\n            AND ');
 
       actionQuery = `
         DELETE FROM ${instrumentTable}
@@ -1194,7 +1207,7 @@ router.post('/QO/ReportApproveReconfirmItem', async (req, res) => {
           [ReportApprover] = NULL,
           [ReportApproveDate] = NULL,
           [RemarkReportApprover] = NULL
-        WHERE CONVERT(NVARCHAR(4000), [Id]) = N'${_esc(requestId)}'
+        WHERE ${requestTargetWhere}
           AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) IN (N'REQ RECONFIRM', N'REQUEST RECONFIRM');
 
         IF @@ROWCOUNT = 0
@@ -1207,7 +1220,7 @@ router.post('/QO/ReportApproveReconfirmItem', async (req, res) => {
           [RequestStatus] = N'COMPLETE',
           [SampleStatus] = N'COMPLETE',
           [ItemStatus] = N'COMPLETE'
-        WHERE CONVERT(NVARCHAR(4000), [Id]) = N'${_esc(requestId)}'
+        WHERE ${requestTargetWhere}
           AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) IN (N'REQ RECONFIRM', N'REQUEST RECONFIRM');
 
         IF @@ROWCOUNT = 0
@@ -2786,6 +2799,27 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
     const optionalColumnsForTable = optionalColumnsByName.get(tableName) || new Set();
     const isCoolingCurve = instrument.toLowerCase().includes('cooling curve');
 
+    // For cooling curve, persist the approved stage graph into Request.Report_Graph
+    // on approve. The just-analysed stage image is already in Request.Picture,
+    // so copy it across (only when both columns exist).
+    let requestHasReportGraph = false;
+    let requestHasPicture = false;
+    if (isCoolingCurve) {
+      const requestGraphColsDb = await mssql.qurey(`
+        SELECT c.name AS ColumnName
+        FROM [QO].sys.tables t
+        INNER JOIN [QO].sys.schemas s ON s.schema_id = t.schema_id
+        INNER JOIN [QO].sys.columns c ON c.object_id = t.object_id
+        WHERE s.name = N'dbo'
+          AND t.name = N'Request'
+          AND c.name IN (N'Picture', N'Report_Graph');
+      `);
+      const graphCols = new Set((requestGraphColsDb["recordsets"]?.[0] || []).map((row) => row.ColumnName));
+      requestHasReportGraph = graphCols.has('Report_Graph');
+      requestHasPicture = graphCols.has('Picture');
+    }
+    const copyPictureToReportGraph = isCoolingCurve && requestHasReportGraph && requestHasPicture;
+
     await _loadQoInstrumentTableMeta([tableName], [
       idColumn,
       'Id',
@@ -2842,6 +2876,11 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
           `[ItemStatus] = N'APPROVE ITEM'`,
           `[RemarkItemApprover] = ${remarkSql}`,
         ];
+        if (copyPictureToReportGraph) {
+          requestSetters.push(
+            `[Report_Graph] = CASE WHEN NULLIF(LTRIM(RTRIM(CONVERT(NVARCHAR(4000), [Picture]))), N'') IS NOT NULL THEN [Picture] ELSE [Report_Graph] END`
+          );
+        }
 
         allQueries += `
           UPDATE ${table}
@@ -2870,8 +2909,10 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
         const dueResult = await calculateAnalysisDue(dueSource, 2);
         const nextDueSql = _sqlTextValue(dueResult.AnalysisDue);
         const statusSql = _sqlTextValue(recheckStatus);
+        // Do NOT rewrite the result columns on recheck: the current stage's
+        // value (e.g. Result_1) must be kept for history/report. Rewriting from
+        // the request payload would blank it out when the value isn't resent.
         const requestSetters = [
-          ...requestResultSetters,
           `[ItemStatus] = ${statusSql}`,
           `[AnalysisDue] = ${nextDueSql}`,
           `[UserAnalysis] = NULL`,
@@ -3188,12 +3229,17 @@ router.post('/QO/KPI', async (req, res) => {
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
-  // Fetch all completed requests for the given year
+  // Include every request that has already been received (ReceivedDate set) for
+  // the given year, regardless of whether it has reached COMPLETE status yet.
+  // Working-day / out-due metrics still only count once the report is approved
+  // (guarded below), so received-but-not-complete requests contribute their
+  // sample amount and cost immediately.
   const query = `
     SELECT *
     FROM [QO].[dbo].[Request]
     WHERE YEAR(ReceivedDate) = ${year}
-      AND UPPER(LTRIM(RTRIM(ISNULL(RequestStatus, N'')))) = N'COMPLETE'
+      AND ReceivedDate IS NOT NULL
+      AND UPPER(LTRIM(RTRIM(ISNULL(RequestStatus, N'')))) NOT IN (N'REJECT', N'CANCEL')
       AND UPPER(LTRIM(RTRIM(ISNULL(SampleStatus, N'')))) NOT IN (N'REJECT', N'CANCEL')
       AND UPPER(LTRIM(RTRIM(ISNULL(ItemStatus, N'')))) NOT IN (N'REJECT', N'CANCEL')
   `;
@@ -3349,7 +3395,6 @@ router.post('/QO/KPIItem', async (req, res) => {
       FROM [QO].[dbo].[Request]
       WHERE YEAR([ReceivedDate]) = ${year}
         AND [ReceivedDate] IS NOT NULL
-        AND UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) = N'COMPLETE'
         AND UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
         AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
         AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
@@ -3441,29 +3486,14 @@ router.post('/QO/KPIItemByCustomer', async (req, res) => {
       });
     }
 
+    // Count every received request (ReceivedDate set) for the year as soon as it
+    // is received, instead of waiting until all of its items reach COMPLETE.
     const requestQuery = `
-      WITH CompleteReqNo AS (
-        SELECT [ReqNo]
-        FROM [QO].[dbo].[Request]
-        GROUP BY [ReqNo]
-        HAVING
-          SUM(CASE
-            WHEN UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL') THEN 1
-            ELSE 0
-          END) > 0
-          AND SUM(CASE
-            WHEN UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
-             AND UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) <> N'COMPLETE' THEN 1
-            ELSE 0
-          END) = 0
-      )
       SELECT
         R.[CustFull],
         R.[ReceivedDate],
         R.[Cost]
       FROM [QO].[dbo].[Request] R
-      INNER JOIN CompleteReqNo C
-        ON C.[ReqNo] = R.[ReqNo]
       WHERE YEAR(R.[ReceivedDate]) = ${year}
         AND R.[ReceivedDate] IS NOT NULL
         AND UPPER(LTRIM(RTRIM(ISNULL(R.[RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')

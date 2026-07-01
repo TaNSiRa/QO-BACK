@@ -493,6 +493,25 @@ function qoRemarkText(sampleRows) {
   return remarks.length ? remarks.join('\n') : '-';
 }
 
+// The cooling performance graph must come from an APPROVED / COMPLETE result
+// only (never a "wait" one), mirroring how result values hide "wait". The
+// latest analysed stage image is stored in each cooling row's Picture column,
+// so use the Picture of the approved cooling item.
+function qoCoolingGraphPath(sampleRows) {
+  const approvedStatuses = new Set(['APPROVE ITEM', 'COMPLETE']);
+  let graph = '';
+  for (const item of sampleRows || []) {
+    const instrument = String(item.Instrument || '').trim().toUpperCase();
+    if (instrument !== 'COOLING CURVE MEASUREMENT') continue;
+    const status = String(item.ItemStatus || '').trim().toUpperCase();
+    const approved = approvedStatuses.has(status) || String(item.ResultApprove || '').trim() !== '';
+    if (!approved) continue;
+    const picture = String(item.Picture || '').trim();
+    if (picture) graph = picture;
+  }
+  return graph;
+}
+
 function qoDrawGraphPage(doc, sampleRows, signatures) {
   const PAGE_W = doc.page.width;
   const PAGE_H = doc.page.height;
@@ -501,7 +520,7 @@ function qoDrawGraphPage(doc, sampleRows, signatures) {
 
   qoFont(doc, true).fontSize(13).text('Graph for cooling performance', 78, 68, { underline: true });
 
-  const graphPath = qoResolveLocalPath(qoHeaderValue(sampleRows, 'Report_Graph'));
+  const graphPath = qoResolveLocalPath(qoCoolingGraphPath(sampleRows) || qoHeaderValue(sampleRows, 'Report_Graph'));
   if (graphPath && fs.existsSync(graphPath)) {
     try {
       doc.image(graphPath, 82, 95, { fit: [470, 360], align: 'center', valign: 'center' });
