@@ -369,7 +369,8 @@ router.post('/QO/getMasterPattern', async (req, res) => {
                 [Min],
                 [Max],
                 [Remark],
-                [FormatReport]
+                [FormatReport],
+                [LOQ_Karlfischer]
               FROM [QO].[dbo].[MasterPattern]
               ORDER BY [CustFull], [SampleNo], [ItemNo];`;
   let db = await mssql.qurey(query);
@@ -2836,6 +2837,12 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
     let allQueries = '';
     await loadHolidays();
 
+    const karlFischerLoqByRequestId = await _loadKarlFischerLoqByRequestId(
+      rows
+        .filter((row) => (row.Action || '').toString().trim().toUpperCase() === 'APPROVE')
+        .map((row) => row.Id)
+    );
+
     for (const row of rows) {
       const action = (row.Action || '').toString().trim().toUpperCase();
       const instrumentRecordId = (row.InstrumentRecordId || '').toString().trim();
@@ -2858,7 +2865,11 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
       const requestResultSetters = _qoApprovalRequestResultSetters(currentStatus, row, isCoolingCurve);
 
       if (action === 'APPROVE') {
-        const resultApprove = (row.ResultApprove || _qoAverageResultText(row.Result_1, row.Result_2)).toString();
+        const averagedResult = (row.ResultApprove || _qoAverageResultText(row.Result_1, row.Result_2)).toString();
+        const resultApprove = _qoApplyKarlFischerLoq(
+          averagedResult,
+          karlFischerLoqByRequestId.get(requestId) === true
+        );
         const resultApproveSql = _sqlTextValue(resultApprove);
         const instrumentSetters = [
           ...instrumentEditableSetters,
@@ -4150,6 +4161,81 @@ function _qoAverageResultText(result1, result2) {
 
 function _qoIsLessThanResultText(value) {
   return String(value || '').trim().startsWith('<');
+}
+
+// ── Karl Fischer LOQ rule ─────────────────────────────────────────────────
+// When MasterPattern.LOQ_Karlfischer is true for the "Water content by Karl
+// Fisher" item, an approved result below the limit of quantitation is reported
+// as "Tr" (trace) instead of the number.
+const QO_KARL_FISCHER_LOQ_LIMIT = 0.05;
+const QO_KARL_FISCHER_TRACE_TEXT = 'Tr';
+const QO_KARL_FISCHER_ITEM_NAME_KEYS = new Set([
+  'watercontentbykarlfisher',
+  'watercontentbykarlfischer',
+]);
+
+function _qoNormalizeName(value) {
+  return String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function _qoIsKarlFischerItemName(itemName) {
+  return QO_KARL_FISCHER_ITEM_NAME_KEYS.has(_qoNormalizeName(itemName));
+}
+
+function _qoIsTrueFlag(value) {
+  const text = String(value ?? '').trim().toLowerCase();
+  return text === 'true' || text === '1' || text === 'yes' || text === 'y';
+}
+
+function _qoApplyKarlFischerLoq(resultApprove, loqEnabled) {
+  if (!loqEnabled) return resultApprove;
+  const numeric = Number(String(resultApprove ?? '').trim());
+  if (!Number.isFinite(numeric) || numeric >= QO_KARL_FISCHER_LOQ_LIMIT) return resultApprove;
+  return QO_KARL_FISCHER_TRACE_TEXT;
+}
+
+async function _qoMasterPatternHasLoqColumn() {
+  const db = await mssql.qurey(`
+    SELECT c.name AS ColumnName
+    FROM [QO].sys.tables t
+    INNER JOIN [QO].sys.schemas s ON s.schema_id = t.schema_id
+    INNER JOIN [QO].sys.columns c ON c.object_id = t.object_id
+    WHERE s.name = N'dbo'
+      AND t.name = N'MasterPattern'
+      AND c.name = N'LOQ_Karlfischer';
+  `);
+  return (db["recordsets"]?.[0] || []).length > 0;
+}
+
+// Map Request.Id -> true when that request row is a Karl Fischer water content
+// item whose MasterPattern row has LOQ_Karlfischer enabled.
+async function _loadKarlFischerLoqByRequestId(requestIds) {
+  const ids = [...new Set((requestIds || []).map((id) => String(id || '').trim()).filter(Boolean))];
+  const loqByRequestId = new Map();
+  if (ids.length === 0) return loqByRequestId;
+  if (!(await _qoMasterPatternHasLoqColumn())) return loqByRequestId;
+
+  const idList = ids.map((id) => `N'${_esc(id)}'`).join(', ');
+  const db = await mssql.qurey(`
+    SELECT
+      CONVERT(NVARCHAR(4000), r.[Id]) AS RequestId,
+      r.[ItemName] AS ItemName,
+      (
+        SELECT TOP (1) mp.[LOQ_Karlfischer]
+        FROM [QO].[dbo].[MasterPattern] mp
+        WHERE mp.[CustShort] = r.[CustShort]
+          AND mp.[SampleNo] = r.[SampleNo]
+          AND mp.[ItemName] = r.[ItemName]
+      ) AS LOQ_Karlfischer
+    FROM [QO].[dbo].[Request] r
+    WHERE CONVERT(NVARCHAR(4000), r.[Id]) IN (${idList});
+  `);
+
+  for (const row of db["recordsets"]?.[0] || []) {
+    const enabled = _qoIsKarlFischerItemName(row.ItemName) && _qoIsTrueFlag(row.LOQ_Karlfischer);
+    loqByRequestId.set(String(row.RequestId || '').trim(), enabled);
+  }
+  return loqByRequestId;
 }
 
 function _qoDecimalPlaces(value) {
