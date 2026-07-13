@@ -653,6 +653,7 @@ router.post('/QO/CreateRequest', async (req, res) => {
       pushField("ItemNo", item.ItemNo);
       pushField("ItemName", item.ItemName);
       pushField("ReportName", item.ReportName);
+      pushField("TestCondition", item.TestCondition);
       pushField("NewOil", item.NewOil);
       pushField("Min", item.Min);
       pushField("Max", item.Max);
@@ -3793,6 +3794,7 @@ function _qoRequestStructureColumns(alias = '') {
     'ItemNo',
     'ItemName',
     'ReportName',
+    'TestCondition',
     'NewOil',
     'Min',
     'Max',

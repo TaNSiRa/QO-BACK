@@ -449,7 +449,7 @@ async function qoDrawResultPage(doc, sampleRows) {
     x = tableX;
     qoCell(doc, x, y, fixedW[0], rowH, item.ReportName || item.ItemName || '', { align: 'left' });
     x += fixedW[0];
-    qoCell(doc, x, y, fixedW[1], rowH, '', { align: 'center' });
+    qoCell(doc, x, y, fixedW[1], rowH, item.TestCondition || '-', { align: 'center' });
     x += fixedW[1];
     qoCell(doc, x, y, fixedW[2], rowH, item.NewOil || '-', { align: 'center' });
     x += fixedW[2];
