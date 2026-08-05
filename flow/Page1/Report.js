@@ -307,21 +307,35 @@ function qoLimit(value) {
   return { type: 'plain', value: num };
 }
 
+// หาขอบล่าง/ขอบบนของ Control Range: ถ้ามีเครื่องหมาย (< ≤ > ≥ / min / max) ให้ยึดตามเครื่องหมาย
+// ถ้าเป็นตัวเลขเปล่าๆ ให้ยึดตามคอลัมน์ คือ Min = ขอบล่าง, Max = ขอบบน (ตรงกับที่แสดงใน qoFormatRange)
+function qoControlBounds(item) {
+  const bounds = {};
+  const assign = (raw, plainRole) => {
+    const limit = qoLimit(raw);
+    if (!limit) return;
+    const role = limit.type === 'plain' ? plainRole : (limit.type === 'min' ? 'lower' : 'upper');
+    if (role === 'lower') {
+      bounds.lower = bounds.lower === undefined ? limit.value : Math.max(bounds.lower, limit.value);
+    } else {
+      bounds.upper = bounds.upper === undefined ? limit.value : Math.min(bounds.upper, limit.value);
+    }
+  };
+  assign(item?.Min, 'lower');
+  assign(item?.Max, 'upper');
+  return bounds;
+}
+
 function qoBuildComments(items) {
   const comments = [];
   for (const item of items) {
     const result = qoNumber(item.ResultApprove);
     if (result === null) continue;
-    const limits = [qoLimit(item.Min), qoLimit(item.Max)].filter(Boolean);
-    for (const limit of limits) {
-      if ((limit.type === 'min' || limit.type === 'plain') && result < limit.value) {
-        comments.push(`${item.ItemName} is lower than Control Range`);
-        break;
-      }
-      if ((limit.type === 'max' || limit.type === 'plain') && result > limit.value) {
-        comments.push(`${item.ItemName} is higher than Control Range`);
-        break;
-      }
+    const { lower, upper } = qoControlBounds(item);
+    if (lower !== undefined && result < lower) {
+      comments.push(`${item.ItemName} is lower than Control Range`);
+    } else if (upper !== undefined && result > upper) {
+      comments.push(`${item.ItemName} is higher than Control Range`);
     }
   }
   return comments.length ? [...new Set(comments)].join(', ') : '-';

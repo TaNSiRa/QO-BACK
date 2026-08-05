@@ -2107,6 +2107,7 @@ router.post('/QO/InstrumentData', async (req, res) => {
 
   try {
     const instrument = (req.body.Instrument || '').toString().trim();
+    const username = (req.body.Username || '').toString().trim();
     const itemStatusFilter = _qoItemStatusFilter(req.body.ListCheck, req.body.FinishCheck);
 
     if (!instrument) {
@@ -2179,6 +2180,13 @@ router.post('/QO/InstrumentData', async (req, res) => {
       .map((column) => `t.${_sqlIdentifier(column)} AS ${_sqlIdentifier(column)}`)
       .join(',\n      ');
 
+    // ส่ง Username มา = แสดงเฉพาะงานที่ user คนนั้น list ไว้
+    // (หน้า P27-P34 ที่เข้ามาจาก P40 เพื่อ approve จะไม่ส่ง Username มา เพื่อให้เห็นงานของทุกคน)
+    const whereConditions = [`t.[ItemStatus] IN (${itemStatusFilter})`];
+    if (username) {
+      whereConditions.push(`t.[UserListItem] = N'${_esc(username)}'`);
+    }
+
     const query = `
       SELECT
         t.${_sqlIdentifier(idColumn)} AS [InstrumentRecordId],
@@ -2186,7 +2194,7 @@ router.post('/QO/InstrumentData', async (req, res) => {
         r.[SamplingDate] AS [SamplingDate]
       FROM ${table} t
       LEFT JOIN [QO].[dbo].[Request] r ON CONVERT(NVARCHAR(4000), r.[Id]) = CONVERT(NVARCHAR(4000), t.[Id])
-      WHERE t.[ItemStatus] IN (${itemStatusFilter})
+      WHERE ${whereConditions.join('\n        AND ')}
       ORDER BY t.[AnalysisDue], t.[SampleCode] DESC, t.[ItemNo];
     `;
 
