@@ -2268,6 +2268,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
     const result2Sql = result2 === '' || result2 === null || result2 === undefined
       ? 'NULL'
       : `N'${_esc(result2)}'`;
+    const requestResult1Sql = _sqlTextValue(_qoRequestResultValue(req.body, 'RequestResult_1', 'Result_1'));
+    const requestResult2Sql = _sqlTextValue(_qoRequestResultValue(req.body, 'RequestResult_2', 'Result_2'));
     const resultPpm1 = req.body.Result_ppm_1;
     const resultPpm2 = req.body.Result_ppm_2;
     const resultPpm1Sql = resultPpm1 === '' || resultPpm1 === null || resultPpm1 === undefined
@@ -2417,14 +2419,14 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
           [UserAnalysis] = ${userAnalysisSql},
           [AnalysisDate] = ${analysisDateSql},
           [ItemStatus] = @NextItemStatus,
-          [Result_1] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${result1Sql} ELSE [Result_1] END,
-          [Result_2] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${result2Sql} ELSE [Result_2] END,
-          [Result_3] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${result1Sql} ELSE [Result_3] END,
-          [Result_4] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${result2Sql} ELSE [Result_4] END,
-          [Result_5] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${result1Sql} ELSE [Result_5] END,
-          [Result_6] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${result2Sql} ELSE [Result_6] END,
-          [Result_7] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${result1Sql} ELSE [Result_7] END,
-          [Result_8] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${result2Sql} ELSE [Result_8] END
+          [Result_1] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${requestResult1Sql} ELSE [Result_1] END,
+          [Result_2] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${requestResult2Sql} ELSE [Result_2] END,
+          [Result_3] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${requestResult1Sql} ELSE [Result_3] END,
+          [Result_4] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${requestResult2Sql} ELSE [Result_4] END,
+          [Result_5] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${requestResult1Sql} ELSE [Result_5] END,
+          [Result_6] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${requestResult2Sql} ELSE [Result_6] END,
+          [Result_7] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${requestResult1Sql} ELSE [Result_7] END,
+          [Result_8] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${requestResult2Sql} ELSE [Result_8] END
         WHERE CONVERT(NVARCHAR(4000), [Id]) = @RequestId;
 
         IF @@ROWCOUNT = 0
@@ -2691,6 +2693,14 @@ router.post('/QO/CoolingCurvePdfUpload', coolingPdfUpload.single('file'), async 
     fs.writeFileSync(pdfPath, file.buffer);
     await _renderPdfFirstPageToPng(pdfPath, imagePath);
 
+    // Best effort only: a PDF without a text layer keeps the OCR fallback.
+    let values = null;
+    try {
+      values = await _extractCoolingCurveValuesFromPdf(pdfPath);
+    } catch (error) {
+      console.error("QO CoolingCurvePdfUpload text extract Error:", error.message || error);
+    }
+
     const escapedPath = _esc(imagePath);
     const instrumentIds = [...new Set(rows.map((row) => (row.InstrumentRecordId || '').toString()).filter(Boolean))];
     const requestIds = [...new Set(rows.map((row) => (row.Id || '').toString()).filter(Boolean))];
@@ -2732,7 +2742,13 @@ router.post('/QO/CoolingCurvePdfUpload', coolingPdfUpload.single('file'), async 
     `;
 
     await mssql.qurey(query);
-    return res.status(200).json({ filePath: imagePath, pdfPath, imagePath });
+    return res.status(200).json({
+      filePath: imagePath,
+      pdfPath,
+      imagePath,
+      values,
+      valueSource: values ? 'pdftext' : '',
+    });
   } catch (error) {
     if (pdfPath && fs.existsSync(pdfPath)) {
       fs.unlinkSync(pdfPath);
@@ -2764,6 +2780,39 @@ router.get('/QO/CoolingCurveImage', (req, res) => {
     return res.sendFile(resolvedPath);
   } catch (error) {
     console.error("QO CoolingCurveImage Error:", error);
+    return res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+router.get('/QO/CoolingCurvePdf', (req, res) => {
+  try {
+    const rawPath = (req.query.path || '').toString();
+    if (!rawPath) {
+      return res.status(400).json({ message: 'Missing pdf path' });
+    }
+
+    const resolvedPath = nodePath.resolve(rawPath);
+    const extension = nodePath.extname(resolvedPath).toLowerCase();
+    if (extension !== '.pdf' && extension !== '.png') {
+      return res.status(400).json({ message: 'Invalid pdf path' });
+    }
+
+    // Request.Picture keeps the rendered .png path, the source .pdf sits next to
+    // it with the same base name.
+    const pdfPath = `${resolvedPath.slice(0, resolvedPath.length - extension.length)}.pdf`;
+    if (!_isCoolingUploadFilePath(pdfPath)) {
+      return res.status(400).json({ message: 'Invalid pdf path' });
+    }
+
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({ message: 'PDF not found' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${nodePath.basename(pdfPath)}"`);
+    return res.sendFile(pdfPath);
+  } catch (error) {
+    console.error("QO CoolingCurvePdf Error:", error);
     return res.status(500).json({ message: error.message || 'Server error' });
   }
 });
@@ -3929,6 +3978,14 @@ async function _renderPdfFirstPageToPng(pdfPath, imagePath) {
 }
 
 function _resolvePopplerPdftocairoPath() {
+  return _resolvePopplerBinPath('pdftocairo.exe');
+}
+
+function _resolvePopplerPdftotextPath() {
+  return _resolvePopplerBinPath('pdftotext.exe');
+}
+
+function _resolvePopplerBinPath(binaryName) {
   const bundledPath = nodePath.join(
     __dirname,
     '..',
@@ -3939,22 +3996,63 @@ function _resolvePopplerPdftocairoPath() {
     'win',
     'poppler-0.51',
     'bin',
-    'pdftocairo.exe'
+    binaryName
   );
 
   if (fs.existsSync(bundledPath)) {
     return bundledPath;
   }
 
-  throw new Error(`Missing Poppler pdftocairo.exe: ${bundledPath}`);
+  throw new Error(`Missing Poppler ${binaryName}: ${bundledPath}`);
 }
 
-function _execFileAsync(file, args) {
+// Cooling curve PDFs come straight out of the measuring instrument, so they
+// carry a real text layer. Reading it is exact, unlike OCR on the rendered
+// page which drops the decimal point of short values such as "4.17".
+async function _extractCoolingCurveValuesFromPdf(pdfPath) {
+  const pdftotextPath = _resolvePopplerPdftotextPath();
+  const { stdout } = await _execFileAsync(
+    pdftotextPath,
+    ['-layout', '-enc', 'UTF-8', '-f', '1', '-l', '1', pdfPath, '-'],
+    'PDF text extraction failed'
+  );
+  return _extractCoolingCurveValuesFromText(stdout);
+}
+
+function _extractCoolingCurveValuesFromText(text) {
+  const lines = String(text || '')
+    .replace(/[℃°˚]/g, 'C')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const valueFor = (patterns) => {
+    for (const line of lines) {
+      const compact = line.toLowerCase().replace(/\s+/g, '');
+      if (!patterns.some((pattern) => pattern.test(compact))) continue;
+      const numbers = line.match(/-?\d+(?:\.\d+)?/g);
+      if (numbers && numbers.length > 0) return numbers[numbers.length - 1];
+    }
+    return '';
+  };
+
+  const values = {
+    Characteristic: valueFor([/charsctemp/, /chartemp/, /characteristic.*temp/]),
+    CTime_400: valueFor([/400.*attetime/, /400.*time/]),
+    CTime_300: valueFor([/300.*attetime/, /300.*time/]),
+    CPerformance: valueFor([/hvalue/, /h-value/, /performance/]),
+  };
+
+  const hasAnyValue = Object.values(values).some((value) => value !== '');
+  return hasAnyValue ? values : null;
+}
+
+function _execFileAsync(file, args, errorLabel = 'PDF to image conversion failed') {
   return new Promise((resolve, reject) => {
-    execFile(file, args, { windowsHide: true }, (error, stdout, stderr) => {
+    execFile(file, args, { windowsHide: true, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
         const detail = (stderr || stdout || error.message || '').toString().trim();
-        reject(new Error(`PDF to image conversion failed${detail ? `: ${detail}` : ''}`));
+        reject(new Error(`${errorLabel}${detail ? `: ${detail}` : ''}`));
         return;
       }
       resolve({ stdout, stderr });
@@ -4113,8 +4211,8 @@ function _qoApprovalInstrumentEditableSetters(row, optionalColumnsForTable) {
 }
 
 function _qoApprovalRequestResultSetters(status, row, isCoolingCurve) {
-  const result1Sql = _sqlTextValue(row.Result_1);
-  const result2Sql = _sqlTextValue(row.Result_2);
+  const result1Sql = _sqlTextValue(_qoRequestResultValue(row, 'RequestResult_1', 'Result_1'));
+  const result2Sql = _sqlTextValue(_qoRequestResultValue(row, 'RequestResult_2', 'Result_2'));
 
   switch (String(status || '').trim().toUpperCase()) {
     case 'LIST ITEM':
@@ -4140,6 +4238,16 @@ function _qoApprovalRequestResultSetters(status, row, isCoolingCurve) {
     default:
       return [];
   }
+}
+
+// Request.Result_1..8 ปกติเก็บค่าเดียวกับ Result_1/Result_2 ของตารางเครื่องมือ
+// แต่บางหน้า (เช่น P30 Karl Fisher) ต้องเก็บค่าจากคอลัมน์ ppm แทนคอลัมน์ %
+// จึงส่ง RequestResult_1/RequestResult_2 มา override ได้
+function _qoRequestResultValue(source, overrideKey, defaultKey) {
+  if (source && Object.prototype.hasOwnProperty.call(source, overrideKey)) {
+    return source[overrideKey];
+  }
+  return source ? source[defaultKey] : undefined;
 }
 
 function _qoAverageResultText(result1, result2) {

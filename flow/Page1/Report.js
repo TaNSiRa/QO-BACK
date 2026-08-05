@@ -262,7 +262,25 @@ function qoFormatRange(min, max) {
   const ca = clean(a);
   const cb = clean(b);
   if (ca && cb) return `${ca} - ${cb}`;
-  return ca || cb || '-';
+  // มีค่าเดียว: ใส่เครื่องหมายนำหน้า (ถ้ายังไม่มีเครื่องหมายอยู่แล้ว)
+  const hasSymbol = (v) => /^[<>≤≥]/.test(v);
+  if (ca) return hasSymbol(ca) ? ca : `≥ ${ca}`;
+  if (cb) return hasSymbol(cb) ? cb : `≤ ${cb}`;
+  return '-';
+}
+
+// นับจำนวน * ที่นำหน้า Remark ของ item นั้นๆ เช่น "* Water Content: ..." -> "*"
+// และ "** Water Content: ..." -> "**" เพื่อเอาไปนำหน้าค่าในคอลัมน์ Control Range
+function qoRemarkMarker(item) {
+  const remark = String(item?.Remark || '').trim();
+  const match = remark.match(/^\*+/);
+  return match ? match[0] : '';
+}
+
+function qoControlRangeText(item) {
+  const range = qoFormatRange(item?.Min, item?.Max);
+  if (!range || range === '-') return range;
+  return `${qoRemarkMarker(item)}${range}`;
 }
 
 function qoResultText(item) {
@@ -453,7 +471,7 @@ async function qoDrawResultPage(doc, sampleRows) {
     x += fixedW[1];
     qoCell(doc, x, y, fixedW[2], rowH, item.NewOil || '-', { align: 'center' });
     x += fixedW[2];
-    qoCell(doc, x, y, fixedW[3], rowH, qoFormatRange(item.Min, item.Max), { align: 'center' });
+    qoCell(doc, x, y, fixedW[3], rowH, qoControlRangeText(item), { align: 'center' });
     x += fixedW[3];
     for (const sample of displaySamples) {
       const key = `${sample.SampleCode}|${item.ItemName}`;
@@ -467,12 +485,29 @@ async function qoDrawResultPage(doc, sampleRows) {
     y += rowH;
   }
 
-  const noteH = 46;
   const samplingGroupW = historyW * displaySamples.length;
-  qoCell(doc, tableX, y, fixedTotalW, noteH, `Remark:\n${qoRemarkText(sampleRows)}`, { align: 'left', boldLabel: true, valign: 'top' });
-  qoCell(doc, tableX + fixedTotalW, y, samplingGroupW, noteH, `Comment: ${qoBuildComments(sampleRows)}`, { align: 'left', boldLabel: true, valign: 'top' });
+  const remarkText = `Remark:\n${qoRemarkText(sampleRows)}`;
+  const commentText = `Comment: ${qoBuildComments(sampleRows)}`;
+  const noteH = qoNoteHeight(doc, [
+    { text: remarkText, w: fixedTotalW },
+    { text: commentText, w: samplingGroupW },
+  ], 46, PAGE_H - 80 - y);
+  qoCell(doc, tableX, y, fixedTotalW, noteH, remarkText, { align: 'left', boldLabel: true, valign: 'top' });
+  qoCell(doc, tableX + fixedTotalW, y, samplingGroupW, noteH, commentText, { align: 'left', boldLabel: true, valign: 'top' });
 
   qoFooter(doc, PAGE_W, PAGE_H);
+}
+
+// ความสูงของช่อง Remark / Comment ให้ยืดตามจำนวนบรรทัดจริง (ไม่ให้ข้อความโดนตัด)
+function qoNoteHeight(doc, cells, minHeight, maxHeight) {
+  qoFont(doc).fontSize(8.5);
+  let needed = minHeight;
+  for (const cell of cells) {
+    const height = doc.heightOfString(String(cell.text ?? ''), { width: cell.w - 8, align: 'left' }) + 9;
+    if (height > needed) needed = height;
+  }
+  const limit = Number.isFinite(maxHeight) ? Math.max(minHeight, maxHeight) : needed;
+  return Math.min(Math.ceil(needed), limit);
 }
 
 function qoPadHistorySamples(samples, desiredCount) {
@@ -488,9 +523,57 @@ function qoPadHistorySamples(samples, desiredCount) {
   return current ? [...blanks, ...previous, current] : [...blanks, ...previous];
 }
 
+// รวม Remark ของทุก item ใน SampleNo เดียวกัน แยกคนละบรรทัด (ไม่ต่อท้ายกัน)
+// และเรียงตามจำนวน * จากน้อยไปมาก เช่น "* ..." ก่อน แล้วค่อย "** ..."
 function qoRemarkText(sampleRows) {
-  const remarks = [...new Set(sampleRows.map((item) => String(item.Remark || '').trim()).filter((v) => v && v !== '-'))];
-  return remarks.length ? remarks.join('\n') : '-';
+  const seen = new Set();
+  const remarks = [];
+  (sampleRows || []).forEach((item, index) => {
+    const text = String(item?.Remark || '').trim();
+    if (!text || text === '-' || seen.has(text)) return;
+    seen.add(text);
+    remarks.push({ text, stars: qoRemarkMarker(item).length, index });
+  });
+  if (remarks.length === 0) return '-';
+
+  return remarks
+    .sort((a, b) => (a.stars - b.stars) || (a.index - b.index))
+    .map((remark) => qoFormatRemarkText(remark.text))
+    .join('\n');
+}
+
+// Remark ที่เขียนเป็นข้อๆ ในบรรทัดเดียว เช่น "* 1. ... 2. ..." ให้ขึ้นบรรทัดใหม่ทุกข้อ
+// (ตัดเฉพาะเลขข้อที่เรียงต่อกันจริงๆ เช่น 1. -> 2. -> 3. เพื่อไม่ให้ตัดผิดที่ตัวเลขทั่วไป)
+function qoFormatRemarkText(text) {
+  const raw = String(text || '').trim();
+  if (!raw) return raw;
+
+  const pattern = /(^|\s+)(\d+)\.\s/g;
+  const marks = [];
+  let match;
+  while ((match = pattern.exec(raw)) !== null) {
+    marks.push({ start: match.index + match[1].length, number: Number(match[2]) });
+  }
+  if (marks.length < 2) return raw;
+
+  const chain = [];
+  let expected = null;
+  for (const mark of marks) {
+    if (expected === null || mark.number === expected) {
+      chain.push(mark);
+      expected = mark.number + 1;
+    }
+  }
+  if (chain.length < 2) return raw;
+
+  const lines = [];
+  for (let i = 0; i < chain.length; i++) {
+    const start = i === 0 ? 0 : chain[i].start;
+    const end = i + 1 < chain.length ? chain[i + 1].start : raw.length;
+    const line = raw.slice(start, end).trim();
+    if (line) lines.push(line);
+  }
+  return lines.join('\n');
 }
 
 // The cooling performance graph must come from an APPROVED / COMPLETE result
@@ -531,9 +614,9 @@ function qoDrawGraphPage(doc, sampleRows, signatures) {
     qoFont(doc).fontSize(11).text('Graph image not found.', 82, 160);
   }
 
-  const issueName = qoHeaderValue(sampleRows, 'UserAnalysis');
-  const checkedName = qoHeaderValue(sampleRows, 'ItemApprover');
-  const approvedName = qoHeaderValue(sampleRows, 'ReportApprover');
+  const issueName = qoHeaderValue(sampleRows, 'UserAnalysis').trim();
+  const checkedName = qoHeaderValue(sampleRows, 'ItemApprover').trim();
+  const approvedName = qoHeaderValue(sampleRows, 'ReportApprover').trim();
   const signRows = [
     { title: 'Issued by', name: issueName, info: signatures.get(issueName) },
     { title: 'Checked By', name: checkedName, info: signatures.get(checkedName) },
@@ -541,6 +624,25 @@ function qoDrawGraphPage(doc, sampleRows, signatures) {
   ];
   qoDrawSignatureTable(doc, PAGE_W - 285, PAGE_H - 168, 240, 88, signRows);
   qoFooter(doc, PAGE_W, PAGE_H);
+}
+
+// ย่อชื่อผู้ลงนาม: อักษรตัวแรกของนามสกุล + "." + ชื่อ
+// เช่น "Mr. Sirawit Kaewchoo" -> "K.Sirawit", "นายศิรวิทย์ แก้วชู" -> "แ.ศิรวิทย์"
+function qoShortName(fullName) {
+  const raw = String(fullName || '').trim();
+  if (!raw) return '';
+  if (/^\S\.\S/.test(raw)) return raw; // ย่ออยู่แล้ว เช่น "K.Sirawit"
+  const withoutTitle = raw
+    .replace(/^(mr|mrs|ms|miss|dr|prof|khun)\.?\s*/i, '')
+    .replace(/^(นาย|นางสาว|นาง|ด\.ช\.|ด\.ญ\.|ดร\.|คุณ)\s*/, '')
+    .trim();
+  const parts = withoutTitle.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return raw;
+  if (parts.length === 1) return parts[0];
+  const firstName = parts[0];
+  const lastName = parts[parts.length - 1];
+  const initial = [...lastName][0];
+  return `${initial.toUpperCase()}.${firstName}`;
 }
 
 function qoDrawSignatureTable(doc, x, y, w, h, rows) {
@@ -560,7 +662,7 @@ function qoDrawSignatureTable(doc, x, y, w, h, rows) {
       } catch (_) { }
     }
     qoThaiFont(doc, true).fontSize(10).fillColor('black')
-      .text(rows[i].info?.displayName || rows[i].name || '', colX + 2, dividerY + 3, { width: colW - 4, align: 'center' });
+      .text(qoShortName(rows[i].info?.fullName || rows[i].name || ''), colX + 2, dividerY + 3, { width: colW - 4, align: 'center' });
     qoThaiFont(doc, true).fontSize(9)
       .text(rows[i].info?.position || '', colX + 2, dividerY + 17, { width: colW - 4, align: 'center' });
   }
@@ -583,13 +685,13 @@ async function qoLoadSignatures(items) {
       const row = db.recordsets?.[0]?.[0] || {};
       const signFileName = row.Name || name;
       output.set(name, {
-        displayName: row.FullName || name,
+        fullName: row.FullName || name,
         position: row.QO_Position || '',
         signaturePath: `\\\\172.23.10.51\\Sign_Pic\\${signFileName}.jpg`,
       });
     } catch (_) {
       output.set(name, {
-        displayName: name,
+        fullName: name,
         position: '',
         signaturePath: `\\\\172.23.10.51\\Sign_Pic\\${name}.jpg`,
       });
