@@ -734,8 +734,18 @@ router.post('/QO/sendSample', async (req, res) => {
   console.log("--sendSample--");
 
   let dataRow = JSON.parse(req.body.dataRow);
+  // item ที่ผู้ใช้กดลบในหน้า Send sample ต้องถูกลบออกจากตาราง Request จริง
+  const deleteIds = _qoParseIdList(req.body.deleteRow);
   let allQueries = '';
   const now = ISOToLocal(new Date());
+
+  if (deleteIds.length > 0) {
+    const idList = deleteIds.map((id) => `N'${_esc(id)}'`).join(', ');
+    allQueries += `
+      DELETE FROM [QO].[dbo].[Request]
+      WHERE CONVERT(NVARCHAR(4000), [Id]) IN (${idList});
+    `;
+  }
 
   for (const data of dataRow) {
     let fields = [];
@@ -765,7 +775,21 @@ router.post('/QO/sendSample', async (req, res) => {
   }
 
   try {
-    await mssql.qurey(allQueries);
+    // ลบ item ที่ถูกเอาออก + อัปเดตสถานะที่เหลือ ต้องสำเร็จหรือล้มเหลวไปด้วยกัน
+    await mssql.qurey(`
+      SET XACT_ABORT ON;
+      BEGIN TRY
+        BEGIN TRANSACTION;
+        ${allQueries}
+        IF @@TRANCOUNT > 0
+          COMMIT TRANSACTION;
+      END TRY
+      BEGIN CATCH
+        IF XACT_STATE() <> 0
+          ROLLBACK TRANSACTION;
+        THROW;
+      END CATCH
+    `);
 
     return res.status(200).json('อัปเดทข้อมูลสำเร็จ');
   } catch (error) {
@@ -2144,6 +2168,7 @@ router.post('/QO/InstrumentData', async (req, res) => {
       'CTime_400',
       'CTime_300',
       'CPerformance',
+      'ErrorType',
       'RemarkItemApprover',
     ];
     const optionalColumnsByName = await _loadQoInstrumentOptionalColumns([tableName], optionalResultColumns);
@@ -2191,7 +2216,9 @@ router.post('/QO/InstrumentData', async (req, res) => {
       SELECT
         t.${_sqlIdentifier(idColumn)} AS [InstrumentRecordId],
         ${selectColumns},
-        r.[SamplingDate] AS [SamplingDate]
+        r.[SamplingDate] AS [SamplingDate],
+        r.[Min] AS [Min],
+        r.[Max] AS [Max]
       FROM ${table} t
       LEFT JOIN [QO].[dbo].[Request] r ON CONVERT(NVARCHAR(4000), r.[Id]) = CONVERT(NVARCHAR(4000), t.[Id])
       WHERE ${whereConditions.join('\n        AND ')}
@@ -2254,6 +2281,7 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       'CTime_400',
       'CTime_300',
       'CPerformance',
+      'ErrorType',
     ];
     const optionalColumnsByName = await _loadQoInstrumentOptionalColumns([tableName], optionalResultColumns);
     const optionalColumnsForTable = optionalColumnsByName.get(tableName) || new Set();
@@ -2342,6 +2370,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
     const cPerformanceSql = cPerformance === '' || cPerformance === null || cPerformance === undefined
       ? 'NULL'
       : `N'${_esc(cPerformance)}'`;
+    // Error ที่ผู้วิเคราะห์เลือก (Instrument breakdown / Sample error / Analysis error)
+    const errorTypeSql = _sqlTextValue(req.body.ErrorType);
     const optionalResultSetters = [
       optionalColumnsForTable.has('Result_1') ? `[Result_1] = ${result1Sql}` : '',
       optionalColumnsForTable.has('Result_2') ? `[Result_2] = ${result2Sql}` : '',
@@ -2365,6 +2395,7 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       optionalColumnsForTable.has('CTime_400') ? `[CTime_400] = ${cTime400Sql}` : '',
       optionalColumnsForTable.has('CTime_300') ? `[CTime_300] = ${cTime300Sql}` : '',
       optionalColumnsForTable.has('CPerformance') ? `[CPerformance] = ${cPerformanceSql}` : '',
+      optionalColumnsForTable.has('ErrorType') ? `[ErrorType] = ${errorTypeSql}` : '',
     ].filter(Boolean);
     const userAnalysisSql = userAnalysis === '' || userAnalysis === null || userAnalysis === undefined
       ? 'NULL'
@@ -2488,7 +2519,10 @@ router.post('/QO/CoolingCurveResultSave', async (req, res) => {
     const table = _qoInstrumentTableFromName(tableName);
     const idColumn = await _resolveQoInstrumentRecordIdColumn(tableName, instrument);
     const coolingColumns = ['Characteristic', 'CTime_400', 'CTime_300', 'CPerformance'];
-    const optionalColumnsByName = await _loadQoInstrumentOptionalColumns([tableName], coolingColumns);
+    const optionalColumnsByName = await _loadQoInstrumentOptionalColumns(
+      [tableName],
+      [...coolingColumns, 'ErrorType']
+    );
     const optionalColumnsForTable = optionalColumnsByName.get(tableName) || new Set();
     const missingCoolingColumns = coolingColumns.filter((column) => !optionalColumnsForTable.has(column));
 
@@ -2528,9 +2562,12 @@ router.post('/QO/CoolingCurveResultSave', async (req, res) => {
       CTime_300: req.body.CTime_300,
       CPerformance: req.body.CPerformance,
     };
-    const coolingSetters = coolingColumns
-      .map((column) => `${_sqlIdentifier(column)} = ${_sqlTextValue(coolingValues[column])}`)
-      .join(',\n          ');
+    const coolingSetters = [
+      ...coolingColumns.map((column) => `${_sqlIdentifier(column)} = ${_sqlTextValue(coolingValues[column])}`),
+      ...(optionalColumnsForTable.has('ErrorType')
+        ? [`[ErrorType] = ${_sqlTextValue(req.body.ErrorType)}`]
+        : []),
+    ].join(',\n          ');
     const userAnalysisSql = _sqlTextValue(userAnalysis);
     const analysisDateSql = _sqlTextValue(now);
 
@@ -2889,6 +2926,7 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
       'ItemApproveDate',
       'RemarkItemApprover',
     ]);
+    const requestHasErrorType = await _qoRequestHasColumn('ErrorType');
 
     const approverSql = _sqlTextValue(approver);
     const approveDateSql = _sqlTextValue(now);
@@ -2923,11 +2961,15 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
       const requestResultSetters = _qoApprovalRequestResultSetters(currentStatus, row, isCoolingCurve);
 
       if (action === 'APPROVE') {
+        // มี Error = ไม่เอาค่าเฉลี่ย Result 1/2 แต่เก็บตัวย่อของ Error แทน
+        const errorAbbreviation = _qoErrorAbbreviation(row.ErrorType);
         const averagedResult = (row.ResultApprove || _qoAverageResultText(row.Result_1, row.Result_2)).toString();
-        const resultApprove = _qoApplyKarlFischerLoq(
-          averagedResult,
-          karlFischerLoqByRequestId.get(requestId) === true
-        );
+        const resultApprove = errorAbbreviation
+          ? errorAbbreviation
+          : _qoApplyKarlFischerLoq(
+              averagedResult,
+              karlFischerLoqByRequestId.get(requestId) === true
+            );
         const resultApproveSql = _sqlTextValue(resultApprove);
         const instrumentSetters = [
           ...instrumentEditableSetters,
@@ -2949,6 +2991,9 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
           requestSetters.push(
             `[Report_Graph] = CASE WHEN NULLIF(LTRIM(RTRIM(CONVERT(NVARCHAR(4000), [Picture]))), N'') IS NOT NULL THEN [Picture] ELSE [Report_Graph] END`
           );
+        }
+        if (requestHasErrorType) {
+          requestSetters.push(`[ErrorType] = ${_sqlTextValue(row.ErrorType)}`);
         }
 
         allQueries += `
@@ -2990,6 +3035,8 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
           `[ItemApprover] = NULL`,
           `[ItemApproveDate] = NULL`,
           `[RemarkItemApprover] = ${remarkSql}`,
+          // เริ่มวิเคราะห์ใหม่ Error ของรอบก่อนต้องไม่ค้าง
+          ...(requestHasErrorType ? [`[ErrorType] = NULL`] : []),
         ];
 
         allQueries += `
@@ -3055,21 +3102,24 @@ router.post('/QO/InstrumentHistory', async (req, res) => {
     const table = _qoInstrumentTableFromName(tableName);
     await _loadQoInstrumentTableMeta(
       [tableName],
-      ['CustFull', 'SampleNo', 'SampleName', 'ItemName', 'SampleCode', 'AnalysisDue', 'AnalysisDate', 'ResultApprove']
+      ['Id', 'CustFull', 'SampleNo', 'SampleName', 'ItemName', 'SampleCode', 'AnalysisDue', 'AnalysisDate', 'ResultApprove']
     );
 
+    // SamplingDate อยู่บนตาราง Request จึง join เข้ามาให้กราฟใช้เป็นแกน X
     const query = `
       SELECT TOP (15)
-        [SampleCode],
-        COALESCE([AnalysisDate], [AnalysisDue]) AS [AnalysisDue],
-        [ResultApprove]
-      FROM ${table}
-      WHERE [CustFull] = N'${_esc(custFull)}'
-        AND [SampleNo] = N'${_esc(sampleNo)}'
-        AND [SampleName] = N'${_esc(sampleName)}'
-        AND [ItemName] = N'${_esc(itemName)}'
-        AND TRY_CONVERT(FLOAT, NULLIF(LTRIM(RTRIM(CONVERT(NVARCHAR(100), [ResultApprove]))), N'')) IS NOT NULL
-      ORDER BY COALESCE([AnalysisDate], [AnalysisDue]) DESC, [SampleCode] DESC;
+        t.[SampleCode],
+        COALESCE(t.[AnalysisDate], t.[AnalysisDue]) AS [AnalysisDue],
+        r.[SamplingDate] AS [SamplingDate],
+        t.[ResultApprove]
+      FROM ${table} t
+      LEFT JOIN [QO].[dbo].[Request] r ON CONVERT(NVARCHAR(4000), r.[Id]) = CONVERT(NVARCHAR(4000), t.[Id])
+      WHERE t.[CustFull] = N'${_esc(custFull)}'
+        AND t.[SampleNo] = N'${_esc(sampleNo)}'
+        AND t.[SampleName] = N'${_esc(sampleName)}'
+        AND t.[ItemName] = N'${_esc(itemName)}'
+        AND TRY_CONVERT(FLOAT, NULLIF(LTRIM(RTRIM(CONVERT(NVARCHAR(100), t.[ResultApprove]))), N'')) IS NOT NULL
+      ORDER BY COALESCE(t.[AnalysisDate], t.[AnalysisDue]) DESC, t.[SampleCode] DESC;
     `;
 
     const db = await mssql.qurey(query);
@@ -4206,7 +4256,22 @@ const QO_APPROVAL_EDITABLE_COLUMNS = [
   'CTime_400',
   'CTime_300',
   'CPerformance',
+  'ErrorType',
 ];
+
+// ── Error ตอน analysis ────────────────────────────────────────────────────
+// เมื่อผู้วิเคราะห์เลือก Error ไว้ ค่า ResultApprove จะเก็บเป็นตัวย่อแทนค่าเฉลี่ย
+const QO_ERROR_ABBREVIATIONS = new Map([
+  ['instrument breakdown', 'I/B'],
+  ['sample error', 'S/E'],
+  ['analysis error', 'A/E'],
+]);
+
+function _qoErrorAbbreviation(errorType) {
+  const text = String(errorType ?? '').trim();
+  if (!text) return '';
+  return QO_ERROR_ABBREVIATIONS.get(text.toLowerCase()) || text;
+}
 
 function _qoApprovalInstrumentEditableSetters(row, optionalColumnsForTable) {
   const setters = [];
@@ -4374,6 +4439,40 @@ function _qoRecheckStatusForApproval(status) {
     default:
       return '';
   }
+}
+
+// ตรวจว่าตาราง Request มีคอลัมน์นี้ไหม (ใช้กับคอลัมน์ที่เพิ่มทีหลัง เช่น ErrorType)
+const _qoRequestColumnCache = new Map();
+async function _qoRequestHasColumn(columnName) {
+  if (_qoRequestColumnCache.has(columnName)) return _qoRequestColumnCache.get(columnName);
+  const db = await mssql.qurey(`
+    SELECT c.name AS ColumnName
+    FROM [QO].sys.tables t
+    INNER JOIN [QO].sys.schemas s ON s.schema_id = t.schema_id
+    INNER JOIN [QO].sys.columns c ON c.object_id = t.object_id
+    WHERE s.name = N'dbo'
+      AND t.name = N'Request'
+      AND c.name = N'${_esc(columnName)}';
+  `);
+  const exists = (db["recordsets"]?.[0] || []).length > 0;
+  _qoRequestColumnCache.set(columnName, exists);
+  return exists;
+}
+
+// รับได้ทั้ง array และ JSON string ที่ frontend ส่งมา คืนเป็นรายการ Id ที่ไม่ซ้ำ
+function _qoParseIdList(value) {
+  let raw = value;
+  if (typeof raw === 'string') {
+    const text = raw.trim();
+    if (!text) return [];
+    try {
+      raw = JSON.parse(text);
+    } catch (_) {
+      raw = text.split(',');
+    }
+  }
+  if (!Array.isArray(raw)) return [];
+  return [...new Set(raw.map((id) => String(id ?? '').trim()).filter(Boolean))];
 }
 
 function _qoInstrumentTable(instrument) {
