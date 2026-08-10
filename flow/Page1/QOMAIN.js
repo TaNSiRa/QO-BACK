@@ -2494,6 +2494,80 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
   }
 });
 
+router.post('/QO/InstrumentItemNameUpdate', async (req, res) => {
+  console.log("--QO-InstrumentItemNameUpdate--");
+
+  try {
+    const instrument = (req.body.Instrument || '').toString().trim();
+    const instrumentRecordId = (req.body.InstrumentRecordId || '').toString().trim();
+    const itemName = (req.body.ItemName || '').toString().trim();
+
+    if (!instrument) {
+      return res.status(400).json({ message: 'Missing Instrument' });
+    }
+
+    if (!instrumentRecordId) {
+      return res.status(400).json({ message: 'Missing InstrumentRecordId' });
+    }
+
+    if (!itemName) {
+      return res.status(400).json({ message: 'Missing ItemName' });
+    }
+
+    const tableName = _qoInstrumentTableName(instrument);
+    const table = _qoInstrumentTableFromName(tableName);
+    const idColumn = await _resolveQoInstrumentRecordIdColumn(tableName, instrument);
+    await _loadQoInstrumentTableMeta([tableName], [idColumn, 'Id', 'ItemName']);
+
+    const escapedRecordId = _esc(instrumentRecordId);
+    const itemNameSql = `N'${_esc(itemName)}'`;
+
+    const query = `
+      SET XACT_ABORT ON;
+      BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @RequestId NVARCHAR(4000);
+
+        SELECT @RequestId = CONVERT(NVARCHAR(4000), [Id])
+        FROM ${table}
+        WHERE ${_sqlIdentifier(idColumn)} = N'${escapedRecordId}';
+
+        IF @RequestId IS NULL
+          RAISERROR('Item name update failed for Id: ${escapedRecordId}', 16, 1);
+
+        UPDATE ${table}
+        SET [ItemName] = ${itemNameSql}
+        WHERE ${_sqlIdentifier(idColumn)} = N'${escapedRecordId}';
+
+        IF @@ROWCOUNT = 0
+          RAISERROR('Item name update failed for Id: ${escapedRecordId}', 16, 1);
+
+        -- Request คือต้นทางของใบงานและรายงาน จึงต้องเปลี่ยนชื่อ item ตามกันเสมอ
+        UPDATE [QO].[dbo].[Request]
+        SET [ItemName] = ${itemNameSql}
+        WHERE CONVERT(NVARCHAR(4000), [Id]) = @RequestId;
+
+        IF @@TRANCOUNT > 0
+          COMMIT TRANSACTION;
+      END TRY
+      BEGIN CATCH
+        IF XACT_STATE() <> 0
+          ROLLBACK TRANSACTION;
+        THROW;
+      END CATCH
+    `;
+
+    await mssql.qurey(query);
+    return res.status(200).json({ message: 'Update Success' });
+  } catch (error) {
+    console.error("QO InstrumentItemNameUpdate Error:", error);
+    const message = error.message || 'Server error';
+    const isConfigError = message.toLowerCase().includes('missing instrument');
+    return res.status(isConfigError ? 400 : 500).json({ message });
+  }
+});
+
 router.post('/QO/CoolingCurveResultSave', async (req, res) => {
   console.log("--QO-CoolingCurveResultSave--");
 

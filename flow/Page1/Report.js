@@ -524,6 +524,8 @@ function qoNoteHeight(doc, cells, minHeight, maxHeight) {
   return Math.min(Math.ceil(needed), limit);
 }
 
+// History เริ่มเติมจากคอลัมน์ซ้ายสุดไล่ไปทางขวา (เก่าสุด -> ใหม่สุด)
+// ช่องที่ยังไม่มีข้อมูลจึงถูกดันไปไว้กลางตาราง ส่วน request ปัจจุบันอยู่คอลัมน์ขวาสุดเสมอ
 function qoPadHistorySamples(samples, desiredCount) {
   const safeSamples = Array.isArray(samples) ? samples : [];
   if (safeSamples.length >= desiredCount) return safeSamples;
@@ -534,7 +536,7 @@ function qoPadHistorySamples(samples, desiredCount) {
     SamplingDate: '',
     current: false,
   }));
-  return current ? [...blanks, ...previous, current] : [...blanks, ...previous];
+  return current ? [...previous, ...blanks, current] : [...previous, ...blanks];
 }
 
 // รวม Remark ของทุก item ใน SampleNo เดียวกัน แยกคนละบรรทัด (ไม่ต่อท้ายกัน)
