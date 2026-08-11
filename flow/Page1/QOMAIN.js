@@ -3041,9 +3041,9 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
         const resultApprove = errorAbbreviation
           ? errorAbbreviation
           : _qoApplyKarlFischerLoq(
-              averagedResult,
-              karlFischerLoqByRequestId.get(requestId) === true
-            );
+            averagedResult,
+            karlFischerLoqByRequestId.get(requestId) === true
+          );
         const resultApproveSql = _sqlTextValue(resultApprove);
         const instrumentSetters = [
           ...instrumentEditableSetters,
@@ -3768,7 +3768,8 @@ router.post('/QO/ItemByDueDate', async (req, res) => {
     COUNT(CASE WHEN R.ItemStatus = 'RECONFIRM' THEN 1 END) AS WAITLISTRECONFIRM,
     COUNT(CASE WHEN R.ItemStatus = 'LIST RECONFIRM' THEN 1 END) AS WAITRECONFIRM,
     COUNT(CASE WHEN R.ItemStatus = 'FINISH ITEM' OR R.ItemStatus = 'FINISH RECHECK 1' OR R.ItemStatus = 'FINISH RECHECK 2' OR R.ItemStatus = 'FINISH RECONFIRM' THEN 1 END) AS WAITAPPROVEJOB,
-    COUNT(CASE WHEN R.ItemStatus = 'APPROVE ITEM' THEN 1 END) AS WAITAPPROVEREPORT
+    COUNT(CASE WHEN R.ItemStatus = 'APPROVE ITEM' THEN 1 END) AS WAITAPPROVEREPORT,
+    COUNT(CASE WHEN R.ItemStatus = 'REQ RECONFIRM' THEN 1 END) AS REQRECONFIRM
 
     FROM [QO].[dbo].[Request] R
     INNER JOIN ReqMaxDue RMD
@@ -3790,7 +3791,7 @@ router.post('/QO/ItemByDueDate', async (req, res) => {
 
     const total = row.RECEIVE + row.WAITANALYSIS + row.WAITLISTRECHECK1 +
       row.WAITRECHECK1 + row.WAITLISTRECHECK2 + row.WAITRECHECK2 +
-      row.WAITLISTRECONFIRM + row.WAITRECONFIRM + row.WAITAPPROVEJOB + row.WAITAPPROVEREPORT;
+      row.WAITLISTRECONFIRM + row.WAITRECONFIRM + row.WAITAPPROVEJOB + row.WAITAPPROVEREPORT + row.REQRECONFIRM;
 
     if (total === 0) continue;
 
@@ -3806,6 +3807,7 @@ router.post('/QO/ItemByDueDate', async (req, res) => {
       WAITRECONFIRM: row.WAITRECONFIRM,
       WAITAPPROVEJOB: row.WAITAPPROVEJOB,
       WAITAPPROVEREPORT: row.WAITAPPROVEREPORT,
+      REQRECONFIRM: row.REQRECONFIRM,
     };
 
     result.Bangpoo.push(item);
