@@ -326,6 +326,17 @@ function qoControlBounds(item) {
   return bounds;
 }
 
+// เช็คว่าค่าผลตรวจอยู่นอก Control Range หรือไม่ (ใช้ทำตัวหนังสือสีแดง)
+// ค่าที่ไม่ใช่ตัวเลข เช่น "wait" หรือช่องว่าง ถือว่าไม่นอก spec
+function qoIsOutOfSpec(item, value) {
+  const result = qoNumber(value);
+  if (result === null) return false;
+  const { lower, upper } = qoControlBounds(item);
+  if (lower !== undefined && result < lower) return true;
+  if (upper !== undefined && result > upper) return true;
+  return false;
+}
+
 function qoBuildComments(items) {
   const comments = [];
   for (const item of items) {
@@ -493,6 +504,7 @@ async function qoDrawResultPage(doc, sampleRows) {
       qoCell(doc, x, y, historyW, rowH, value, {
         bg: sample.current ? '#DDEBF7' : null,
         align: 'center',
+        color: qoIsOutOfSpec(item, value) ? '#FF0000' : null,
       });
       x += historyW;
     }
