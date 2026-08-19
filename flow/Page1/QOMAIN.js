@@ -1521,17 +1521,20 @@ router.post('/QO/getReqList', async (req, res) => {
           ROW_NUMBER() OVER (
             PARTITION BY [ReqNo]
             ORDER BY
-              CASE UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N''))))
-                WHEN N'COMPLETE' THEN 6
-                WHEN N'WAIT APPROVE' THEN 5
-                WHEN N'WAIT ANALYSIS' THEN 4
-                WHEN N'RECEIVE SAMPLE' THEN 3
-                WHEN N'SEND SAMPLE' THEN 2
-                WHEN N'WAIT SAMPLE' THEN 1
-                WHEN N'CANCEL' THEN 0
-                WHEN N'REJECT' THEN 0
+              CASE
+                WHEN LTRIM(RTRIM(ISNULL([RequestStatus], N''))) = N'' THEN 2
+                WHEN UPPER(LTRIM(RTRIM([RequestStatus]))) IN (N'CANCEL', N'REJECT') THEN 1
                 ELSE 0
-              END DESC,
+              END ASC,
+              CASE UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N''))))
+                WHEN N'WAIT SAMPLE' THEN 0
+                WHEN N'SEND SAMPLE' THEN 1
+                WHEN N'RECEIVE SAMPLE' THEN 2
+                WHEN N'WAIT ANALYSIS' THEN 3
+                WHEN N'WAIT APPROVE' THEN 4
+                WHEN N'COMPLETE' THEN 5
+                ELSE 99
+              END ASC,
               [RequestStatus] ASC
           ) AS [StatusRowNo]
         FROM FilteredRequest
