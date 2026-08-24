@@ -2172,6 +2172,7 @@ router.post('/QO/InstrumentData', async (req, res) => {
       'CTime_300',
       'CPerformance',
       'ErrorType',
+      'TempSaveDate',
       'RemarkItemApprover',
     ];
     const optionalColumnsByName = await _loadQoInstrumentOptionalColumns([tableName], optionalResultColumns);
@@ -2285,6 +2286,7 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       'CTime_300',
       'CPerformance',
       'ErrorType',
+      'TempSaveDate',
     ];
     const optionalColumnsByName = await _loadQoInstrumentOptionalColumns([tableName], optionalResultColumns);
     const optionalColumnsForTable = optionalColumnsByName.get(tableName) || new Set();
@@ -2406,8 +2408,13 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
     const analysisDateSql = `N'${_esc(now)}'`;
     const escapedInstrumentRecordId = _esc(instrumentRecordId);
     const isFinalSave = action.toUpperCase() === 'SAVE';
+    // เก็บเวลาที่กด Temp Save ไว้ให้หน้าจอรู้ว่าแถวนี้กดไปแล้ว และล้างทิ้งเมื่อ Save จริง
+    const tempSaveSetters = optionalColumnsForTable.has('TempSaveDate')
+      ? [`[TempSaveDate] = ${isFinalSave ? 'NULL' : analysisDateSql}`]
+      : [];
     const updateSetters = [
       ...optionalResultSetters,
+      ...tempSaveSetters,
       ...(isFinalSave ? [
         `[UserAnalysis] = ${userAnalysisSql}`,
         `[AnalysisDate] = ${analysisDateSql}`,
@@ -2598,7 +2605,7 @@ router.post('/QO/CoolingCurveResultSave', async (req, res) => {
     const coolingColumns = ['Characteristic', 'CTime_400', 'CTime_300', 'CPerformance'];
     const optionalColumnsByName = await _loadQoInstrumentOptionalColumns(
       [tableName],
-      [...coolingColumns, 'ErrorType']
+      [...coolingColumns, 'ErrorType', 'TempSaveDate']
     );
     const optionalColumnsForTable = optionalColumnsByName.get(tableName) || new Set();
     const missingCoolingColumns = coolingColumns.filter((column) => !optionalColumnsForTable.has(column));
@@ -2643,6 +2650,10 @@ router.post('/QO/CoolingCurveResultSave', async (req, res) => {
       ...coolingColumns.map((column) => `${_sqlIdentifier(column)} = ${_sqlTextValue(coolingValues[column])}`),
       ...(optionalColumnsForTable.has('ErrorType')
         ? [`[ErrorType] = ${_sqlTextValue(req.body.ErrorType)}`]
+        : []),
+      // เวลาที่กด Temp Save ล่าสุด (ล้างเมื่อ Save จริง) ให้หน้าจอรู้ว่ากดไปแล้ว
+      ...(optionalColumnsForTable.has('TempSaveDate')
+        ? [`[TempSaveDate] = ${isFinalSave ? 'NULL' : _sqlTextValue(now)}`]
         : []),
     ].join(',\n          ');
     const userAnalysisSql = _sqlTextValue(userAnalysis);
