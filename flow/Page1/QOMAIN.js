@@ -3564,7 +3564,7 @@ router.post('/QO/KPIItem', async (req, res) => {
     { key: 'flashPoint', label: 'Flash Point', instrument: 'Flash Point' },
     { key: 'acidNumber', label: 'Acid Number', instrument: 'Acid Number (Auto-titration)' },
     { key: 'carbonResidue', label: 'Carbon Residue', instrument: 'Micro Carbon Residue Tester' },
-    { key: 'waterKarlFisher', label: 'Water content by\nKarl Fisher', instrument: 'Water content (Karl Fisher)' },
+    { key: 'waterKarlFisher', label: 'Water content by\nKarl Fischer', instrument: 'Water content (Karl Fischer)' },
     { key: 'waterDistillation', label: 'Water content\nDistillation', instrument: 'Water content (Distillation)' },
     { key: 'kinematicViscosity', label: 'Kinematic\nviscosity', instrument: 'Kinematic viscosity' },
     { key: 'coolingCurve', label: 'Characteristic\nTemperature', instrument: 'Cooling curve measurement' },
@@ -4404,7 +4404,7 @@ function _qoApprovalRequestResultSetters(status, row, isCoolingCurve) {
 }
 
 // Request.Result_1..8 ปกติเก็บค่าเดียวกับ Result_1/Result_2 ของตารางเครื่องมือ
-// แต่บางหน้า (เช่น P30 Karl Fisher) ต้องเก็บค่าจากคอลัมน์ ppm แทนคอลัมน์ %
+// แต่บางหน้า (เช่น P30 Karl Fischer) ต้องเก็บค่าจากคอลัมน์ ppm แทนคอลัมน์ %
 // จึงส่ง RequestResult_1/RequestResult_2 มา override ได้
 function _qoRequestResultValue(source, overrideKey, defaultKey) {
   if (source && Object.prototype.hasOwnProperty.call(source, overrideKey)) {
@@ -4438,7 +4438,7 @@ function _qoIsLessThanResultText(value) {
 
 // ── Karl Fischer LOQ rule ─────────────────────────────────────────────────
 // When MasterPattern.LOQ_Karlfischer is true for the "Water content by Karl
-// Fisher" item, an approved result below the limit of quantitation is reported
+// Fischer" item, an approved result below the limit of quantitation is reported
 // as "Tr" (trace) instead of the number.
 const QO_KARL_FISCHER_LOQ_LIMIT = 0.05;
 const QO_KARL_FISCHER_TRACE_TEXT = 'Tr';

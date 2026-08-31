@@ -50,8 +50,8 @@ DECLARE @ReqNo NVARCHAR(100) = N'QUE-26-0020';   -- << NULL = ทุกใบ
     FROM [dbo].[Instrument_Micro Carbon Residue Tester] t
     UNION ALL SELECT N'Instrument_Water content (Distillation)', CONVERT(NVARCHAR(4000), t.[Id]), CONVERT(NVARCHAR(4000), t.[ReqNo]), CONVERT(NVARCHAR(4000), t.[SampleCode]), CONVERT(NVARCHAR(4000), t.[CustShort]), CONVERT(NVARCHAR(4000), t.[Instrument]), CONVERT(NVARCHAR(4000), t.[ItemNo]), CONVERT(NVARCHAR(4000), t.[ItemName]), CONVERT(NVARCHAR(4000), t.[ReportName]), CONVERT(NVARCHAR(4000), t.[ItemStatus]), CONVERT(NVARCHAR(4000), t.[UserListItem]), CONVERT(NVARCHAR(4000), t.[UserAnalysis]), CONVERT(NVARCHAR(4000), t.[ResultApprove]), CONVERT(NVARCHAR(4000), t.[ItemApprover])
     FROM [dbo].[Instrument_Water content (Distillation)] t
-    UNION ALL SELECT N'Instrument_Water content (Karl Fisher)', CONVERT(NVARCHAR(4000), t.[Id]), CONVERT(NVARCHAR(4000), t.[ReqNo]), CONVERT(NVARCHAR(4000), t.[SampleCode]), CONVERT(NVARCHAR(4000), t.[CustShort]), CONVERT(NVARCHAR(4000), t.[Instrument]), CONVERT(NVARCHAR(4000), t.[ItemNo]), CONVERT(NVARCHAR(4000), t.[ItemName]), CONVERT(NVARCHAR(4000), t.[ReportName]), CONVERT(NVARCHAR(4000), t.[ItemStatus]), CONVERT(NVARCHAR(4000), t.[UserListItem]), CONVERT(NVARCHAR(4000), t.[UserAnalysis]), CONVERT(NVARCHAR(4000), t.[ResultApprove]), CONVERT(NVARCHAR(4000), t.[ItemApprover])
-    FROM [dbo].[Instrument_Water content (Karl Fisher)] t
+    UNION ALL SELECT N'Instrument_Water content (Karl Fischer)', CONVERT(NVARCHAR(4000), t.[Id]), CONVERT(NVARCHAR(4000), t.[ReqNo]), CONVERT(NVARCHAR(4000), t.[SampleCode]), CONVERT(NVARCHAR(4000), t.[CustShort]), CONVERT(NVARCHAR(4000), t.[Instrument]), CONVERT(NVARCHAR(4000), t.[ItemNo]), CONVERT(NVARCHAR(4000), t.[ItemName]), CONVERT(NVARCHAR(4000), t.[ReportName]), CONVERT(NVARCHAR(4000), t.[ItemStatus]), CONVERT(NVARCHAR(4000), t.[UserListItem]), CONVERT(NVARCHAR(4000), t.[UserAnalysis]), CONVERT(NVARCHAR(4000), t.[ResultApprove]), CONVERT(NVARCHAR(4000), t.[ItemApprover])
+    FROM [dbo].[Instrument_Water content (Karl Fischer)] t
 )
 SELECT o.InstrTable, o.[Id], o.[ReqNo], o.[SampleCode], o.[CustShort],
        o.[Instrument], o.[ItemNo], o.[ItemName], o.[ReportName],
@@ -90,7 +90,7 @@ INSERT INTO @tables (name) VALUES
     (N'Instrument_Kinematic viscosity'),
     (N'Instrument_Micro Carbon Residue Tester'),
     (N'Instrument_Water content (Distillation)'),
-    (N'Instrument_Water content (Karl Fisher)');
+    (N'Instrument_Water content (Karl Fischer)');
 
 DECLARE @tb SYSNAME, @sql NVARCHAR(MAX), @cnt INT, @Total INT = 0;
 
