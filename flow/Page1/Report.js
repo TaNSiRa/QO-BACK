@@ -266,9 +266,11 @@ function qoFormatRange(min, max) {
   const cb = clean(b);
   if (ca && cb) return `${ca} - ${cb}`;
   // มีค่าเดียว: ใส่เครื่องหมายนำหน้า (ถ้ายังไม่มีเครื่องหมายอยู่แล้ว)
+  // ยกเว้นคำว่า "Actual" ซึ่งเป็นข้อความล้วน ไม่ต้องใส่เครื่องหมายใดๆ
   const hasSymbol = (v) => /^[<>≤≥]/.test(v);
-  if (ca) return hasSymbol(ca) ? ca : `≥ ${ca}`;
-  if (cb) return hasSymbol(cb) ? cb : `≤ ${cb}`;
+  const isActual = (v) => v.toLowerCase() === 'actual';
+  if (ca) return hasSymbol(ca) || isActual(ca) ? ca : `≥ ${ca}`;
+  if (cb) return hasSymbol(cb) || isActual(cb) ? cb : `≤ ${cb}`;
   return '-';
 }
 
