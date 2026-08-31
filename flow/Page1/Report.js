@@ -6,6 +6,9 @@ const path = require("path");
 var mssql = require('../../function/mssql');
 var mongodb = require('../../function/mongodb');
 
+// รหัสฟอร์มมุมล่างขวาของทุกหน้ารายงาน
+const QO_FORM_CODE = 'FR-CTC-04/006-01-01/09/26';
+
 router.post("/QO/CreateReport", async (req, res) => {
   console.log("QO/CreateReport");
   try {
@@ -764,6 +767,8 @@ function qoFooter(doc, pageW, pageH) {
     .text('T H A I   P A R K E R I Z I N G   C O., L T D.', 0, pageH - 70, { width: pageW, align: 'center' });
   qoFont(doc).fontSize(6).fillColor('#4774FF')
     .text('570 Moo 4 Bangpoo Industrial Estate Soi 12, Sukhumvit Rd., Prakasa, Muang, Samutprakarn 10280 Tel.0-2324-6600, Fax.0-2324-6687', 0, pageH - 50, { width: pageW, align: 'center' });
+  qoFont(doc).fontSize(7).fillColor('black')
+    .text(QO_FORM_CODE, 0, pageH - 40, { width: pageW - 40, align: 'right' });
   doc.fillColor('black');
 }
 
