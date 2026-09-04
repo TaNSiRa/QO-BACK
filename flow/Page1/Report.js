@@ -54,14 +54,7 @@ router.post("/QO/CreateReport", async (req, res) => {
     const writeStream = fs.createWriteStream(reportPath);
     doc.pipe(writeStream);
 
-    const fontNormal = path.join(__dirname, '../../assets/fonts/times.ttf');
-    const fontBold = path.join(__dirname, '../../assets/fonts/timesbd.ttf');
-    const fontThai = path.join(__dirname, '../../assets/fonts/THSarabunNew.ttf');
-    const fontThaiBold = path.join(__dirname, '../../assets/fonts/THSarabunNew Bold.ttf');
-    if (fs.existsSync(fontNormal)) doc.registerFont('QO-Times', fontNormal);
-    if (fs.existsSync(fontBold)) doc.registerFont('QO-Times-Bold', fontBold);
-    if (fs.existsSync(fontThai)) doc.registerFont('QO-Thai', fontThai);
-    if (fs.existsSync(fontThaiBold)) doc.registerFont('QO-Thai-Bold', fontThaiBold);
+    qoRegisterFonts(doc);
 
     const signatures = await qoLoadSignatures(reportItems);
 
@@ -87,6 +80,105 @@ router.post("/QO/CreateReport", async (req, res) => {
     return res.status(500).json({ message: error.message || "Server error" });
   }
 });
+
+// ตารางที่อนุญาตให้ preview ได้ (กันการยิงชื่อตารางแปลกๆ เข้ามาใน query)
+const QO_PREVIEW_TABLES = ['MasterPattern'];
+
+// Preview report จาก master ที่บันทึกไว้แล้ว: ใช้ layout เดียวกับ QO/CreateReport
+// แต่ไม่ใส่ค่าผลวิเคราะห์ เพื่อให้เห็นว่าแก้ master แล้ว report จะออกมาหน้าตาแบบไหน
+router.post("/QO/PreviewMasterReport", async (req, res) => {
+  console.log("QO/PreviewMasterReport");
+  try {
+    const custShort = (req.body.CustShort || '').toString().trim();
+    if (!custShort) {
+      return res.status(400).send('ERROR: ไม่พบ CustShort ของลูกค้า');
+    }
+
+    const requestedTable = (req.body.masterType || '').toString().trim();
+    const tableName = QO_PREVIEW_TABLES.includes(requestedTable) ? requestedTable : QO_PREVIEW_TABLES[0];
+
+    const db = await mssql.qurey(`
+      SELECT *
+      FROM [QO].[dbo].[${tableName}]
+      WHERE [CustShort] = N'${qoEsc(custShort)}'
+      ORDER BY [SampleNo], TRY_CONVERT(INT, [ItemNo]), [ItemNo];
+    `);
+    const masterRows = db.recordsets?.[0] || [];
+    if (masterRows.length === 0) {
+      return res.status(200).send('NODATA');
+    }
+
+    const previewRows = qoBuildPreviewRows(masterRows);
+    const groups = qoGroupBy(previewRows, (item) => item.SampleCode);
+
+    const doc = new PDFDocument({ margin: 18, size: "A4", layout: "landscape" });
+    qoRegisterFonts(doc);
+
+    const chunks = [];
+    doc.on('data', (chunk) => chunks.push(chunk));
+    const finished = new Promise((resolve, reject) => {
+      doc.on('end', resolve);
+      doc.on('error', reject);
+    });
+
+    let firstPage = true;
+    for (const sampleRows of groups.values()) {
+      if (!firstPage) doc.addPage({ size: "A4", layout: "landscape", margin: 18 });
+      firstPage = false;
+      await qoDrawResultPage(doc, sampleRows, { preview: true });
+
+      doc.addPage({ size: "A4", layout: "landscape", margin: 18 });
+      qoDrawGraphPage(doc, sampleRows, new Map(), { preview: true });
+    }
+
+    doc.end();
+    await finished;
+
+    return res.status(200).send(Buffer.concat(chunks).toString('base64'));
+  } catch (error) {
+    console.error("QO PreviewMasterReport Error:", error);
+    return res.status(500).send(`ERROR: ${error.message || 'Server error'}`);
+  }
+});
+
+// แปลงแถว master ให้อยู่ในรูปเดียวกับแถว Request ที่ report ใช้ โดยเว้นค่าผลวิเคราะห์
+// และค่าที่ยังไม่เกิดจริง (วันที่ / ผู้ลงนาม / กราฟ) ไว้ว่างทั้งหมด
+function qoBuildPreviewRows(masterRows) {
+  return (masterRows || []).map((row) => {
+    const sampleNo = String(row.SampleNo ?? '').trim();
+    return {
+      ...row,
+      ReqNo: 'PREVIEW',
+      SampleCode: `PREVIEW-${sampleNo || '01'}`,
+      SamplingDate: '',
+      SendDate: '',
+      ReceivedDate: '',
+      AnalysisDue: '',
+      ReportApproveDate: '',
+      Result: '',
+      ResultApprove: '',
+      RequestStatus: 'PREVIEW',
+      SampleStatus: 'PREVIEW',
+      ItemStatus: 'PREVIEW',
+      UserAnalysis: '',
+      ItemApprover: '',
+      ReportApprover: '',
+      Picture: '',
+      Report_Graph: '',
+    };
+  });
+}
+
+function qoRegisterFonts(doc) {
+  const fontNormal = path.join(__dirname, '../../assets/fonts/times.ttf');
+  const fontBold = path.join(__dirname, '../../assets/fonts/timesbd.ttf');
+  const fontThai = path.join(__dirname, '../../assets/fonts/THSarabunNew.ttf');
+  const fontThaiBold = path.join(__dirname, '../../assets/fonts/THSarabunNew Bold.ttf');
+  if (fs.existsSync(fontNormal)) doc.registerFont('QO-Times', fontNormal);
+  if (fs.existsSync(fontBold)) doc.registerFont('QO-Times-Bold', fontBold);
+  if (fs.existsSync(fontThai)) doc.registerFont('QO-Thai', fontThai);
+  if (fs.existsSync(fontThaiBold)) doc.registerFont('QO-Thai-Bold', fontThaiBold);
+}
 
 function qoIsReportItemAllowed(item) {
   const status = String(item?.RequestStatus || '').trim().toUpperCase();
@@ -431,14 +523,18 @@ async function qoLoadHistoryForSample(sampleRows, maxColumns) {
   return { samples: [...previous, current], values };
 }
 
-async function qoDrawResultPage(doc, sampleRows) {
+async function qoDrawResultPage(doc, sampleRows, options = {}) {
+  const isPreview = options.preview === true;
   const PAGE_W = doc.page.width;
   const PAGE_H = doc.page.height;
   const first = sampleRows[0];
   const formatReport = String(first.FormatReport || first.Format_Report || '').trim();
   const isFormat1 = formatReport === '1';
   const historyColumnCount = isFormat1 ? 7 : 1;
-  const history = await qoLoadHistoryForSample(sampleRows, historyColumnCount);
+  // preview ยังไม่มี request จริง จึงไม่ต้องไปดึงผลย้อนหลังจาก DB (ทุกช่องผลเว้นว่างไว้)
+  const history = isPreview
+    ? { samples: [{ SampleCode: first.SampleCode, SamplingDate: '', current: true }], values: new Map() }
+    : await qoLoadHistoryForSample(sampleRows, historyColumnCount);
   const displaySamples = qoPadHistorySamples(history.samples, historyColumnCount);
   const tableY = 190;
   const maxTableW = PAGE_W - 80;
@@ -505,7 +601,9 @@ async function qoDrawResultPage(doc, sampleRows) {
     x += fixedW[3];
     for (const sample of displaySamples) {
       const key = `${sample.SampleCode}|${item.ItemName}`;
-      const value = sample.current ? qoResultText(item) : (history.values.get(key) || '');
+      const value = isPreview
+        ? ''
+        : (sample.current ? qoResultText(item) : (history.values.get(key) || ''));
       qoCell(doc, x, y, historyW, rowH, value, {
         bg: sample.current ? '#DDEBF7' : null,
         align: 'center',
@@ -628,7 +726,8 @@ function qoCoolingGraphPath(sampleRows) {
   return graph;
 }
 
-function qoDrawGraphPage(doc, sampleRows, signatures) {
+function qoDrawGraphPage(doc, sampleRows, signatures, options = {}) {
+  const isPreview = options.preview === true;
   const PAGE_W = doc.page.width;
   const PAGE_H = doc.page.height;
   const first = sampleRows[0];
@@ -643,6 +742,8 @@ function qoDrawGraphPage(doc, sampleRows, signatures) {
     } catch (_) {
       qoFont(doc).fontSize(11).text('Graph image cannot be rendered.', 82, 160);
     }
+  } else if (isPreview) {
+    qoFont(doc).fontSize(11).text('Preview mode: the graph is created from the analysis result.', 82, 160);
   } else {
     qoFont(doc).fontSize(11).text('Graph image not found.', 82, 160);
   }
