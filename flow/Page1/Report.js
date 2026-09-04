@@ -101,7 +101,7 @@ router.post("/QO/PreviewMasterReport", async (req, res) => {
       SELECT *
       FROM [QO].[dbo].[${tableName}]
       WHERE [CustShort] = N'${qoEsc(custShort)}'
-      ORDER BY [SampleNo], TRY_CONVERT(INT, [ItemNo]), [ItemNo];
+      ORDER BY [SampleNo], [ItemNo];
     `);
     const masterRows = db.recordsets?.[0] || [];
     if (masterRows.length === 0) {
