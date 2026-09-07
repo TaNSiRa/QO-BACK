@@ -1651,6 +1651,8 @@ router.post('/QO/listItem', async (req, res) => {
     const optionalInstrumentColumns = [
       'Result_ppm_1',
       'Result_ppm_2',
+      'Result_pct_1',
+      'Result_pct_2',
       'SampleUse_1',
       'SampleUse_2',
       'CollectWater_1',
@@ -2153,6 +2155,8 @@ router.post('/QO/InstrumentData', async (req, res) => {
       'Result_2',
       'Result_ppm_1',
       'Result_ppm_2',
+      'Result_pct_1',
+      'Result_pct_2',
       'SampleUse_1',
       'SampleUse_2',
       'CollectWater_1',
@@ -2267,6 +2271,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       'Result_2',
       'Result_ppm_1',
       'Result_ppm_2',
+      'Result_pct_1',
+      'Result_pct_2',
       'SampleUse_1',
       'SampleUse_2',
       'CollectWater_1',
@@ -2319,6 +2325,14 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
     const resultPpm2Sql = resultPpm2 === '' || resultPpm2 === null || resultPpm2 === undefined
       ? 'NULL'
       : `N'${_esc(resultPpm2)}'`;
+    const resultPct1 = req.body.Result_pct_1;
+    const resultPct2 = req.body.Result_pct_2;
+    const resultPct1Sql = resultPct1 === '' || resultPct1 === null || resultPct1 === undefined
+      ? 'NULL'
+      : `N'${_esc(resultPct1)}'`;
+    const resultPct2Sql = resultPct2 === '' || resultPct2 === null || resultPct2 === undefined
+      ? 'NULL'
+      : `N'${_esc(resultPct2)}'`;
     const sampleUse1 = req.body.SampleUse_1;
     const sampleUse2 = req.body.SampleUse_2;
     const collectWater1 = req.body.CollectWater_1;
@@ -2382,6 +2396,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
       optionalColumnsForTable.has('Result_2') ? `[Result_2] = ${result2Sql}` : '',
       optionalColumnsForTable.has('Result_ppm_1') ? `[Result_ppm_1] = ${resultPpm1Sql}` : '',
       optionalColumnsForTable.has('Result_ppm_2') ? `[Result_ppm_2] = ${resultPpm2Sql}` : '',
+      optionalColumnsForTable.has('Result_pct_1') ? `[Result_pct_1] = ${resultPct1Sql}` : '',
+      optionalColumnsForTable.has('Result_pct_2') ? `[Result_pct_2] = ${resultPct2Sql}` : '',
       optionalColumnsForTable.has('SampleUse_1') ? `[SampleUse_1] = ${sampleUse1Sql}` : '',
       optionalColumnsForTable.has('SampleUse_2') ? `[SampleUse_2] = ${sampleUse2Sql}` : '',
       optionalColumnsForTable.has('CollectWater_1') ? `[CollectWater_1] = ${collectWater1Sql}` : '',
@@ -3021,7 +3037,7 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
     let allQueries = '';
     await loadHolidays();
 
-    const karlFischerLoqByRequestId = await _loadKarlFischerLoqByRequestId(
+    const waterContentLoqByRequestId = await _loadWaterContentLoqByRequestId(
       rows
         .filter((row) => (row.Action || '').toString().trim().toUpperCase() === 'APPROVE')
         .map((row) => row.Id)
@@ -3054,9 +3070,9 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
         const averagedResult = (row.ResultApprove || _qoAverageResultText(row.Result_1, row.Result_2)).toString();
         const resultApprove = errorAbbreviation
           ? errorAbbreviation
-          : _qoApplyKarlFischerLoq(
+          : _qoApplyWaterContentLoq(
             averagedResult,
-            karlFischerLoqByRequestId.get(requestId) === true
+            waterContentLoqByRequestId.get(requestId) === true
           );
         const resultApproveSql = _sqlTextValue(resultApprove);
         const instrumentSetters = [
@@ -4328,6 +4344,8 @@ const QO_APPROVAL_EDITABLE_COLUMNS = [
   'Result_2',
   'Result_ppm_1',
   'Result_ppm_2',
+  'Result_pct_1',
+  'Result_pct_2',
   'SampleUse_1',
   'SampleUse_2',
   'CollectWater_1',
@@ -4436,23 +4454,34 @@ function _qoIsLessThanResultText(value) {
   return String(value || '').trim().startsWith('<');
 }
 
-// ── Karl Fischer LOQ rule ─────────────────────────────────────────────────
-// When MasterPattern.LOQ_Karlfischer is true for the "Water content by Karl
-// Fischer" item, an approved result below the limit of quantitation is reported
-// as "Tr" (trace) instead of the number.
-const QO_KARL_FISCHER_LOQ_LIMIT = 0.05;
-const QO_KARL_FISCHER_TRACE_TEXT = 'Tr';
-const QO_KARL_FISCHER_ITEM_NAME_KEYS = new Set([
-  'watercontentbykarlfisher',
-  'watercontentbykarlfischer',
-]);
+// ── Water content LOQ rule ────────────────────────────────────────────────
+// When MasterPattern.LOQ_Karlfischer is true for a water content item
+// (Karl Fischer P30 / Distillation P31), an approved result below the limit of
+// quantitation is reported as "Tr" (trace) instead of the number.
+// The limit is expressed in percent, so the rule only applies to items reported
+// as "... (%)" — the (ppm) variant is never traced.
+// (The MasterPattern column keeps its original name even though the flag now
+//  covers both water content methods — P09 already lets users edit it for both.)
+const QO_WATER_CONTENT_LOQ_LIMIT = 0.05;
+const QO_WATER_CONTENT_TRACE_TEXT = 'Tr';
+const QO_WATER_CONTENT_LOQ_METHOD_KEYS = ['karlfisher', 'karlfischer', 'distillation'];
 
 function _qoNormalizeName(value) {
   return String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-function _qoIsKarlFischerItemName(itemName) {
-  return QO_KARL_FISCHER_ITEM_NAME_KEYS.has(_qoNormalizeName(itemName));
+// รับได้ทั้ง 'Water content by Karl Fischer' และ 'Water content by Distillation'
+// (สะกด Karl Fisher/Fischer ได้ทั้งสองแบบ ตรงกับกฎที่หน้า P09 ใช้เปิด-ปิด LOQ)
+function _qoIsWaterContentLoqItemName(itemName) {
+  const key = _qoNormalizeName(itemName);
+  if (!key.startsWith('watercontent')) return false;
+  return QO_WATER_CONTENT_LOQ_METHOD_KEYS.some((method) => key.includes(method));
+}
+
+// Request.Result_1..8 / ResultApprove ของ P30-P31 เก็บค่าตามหน่วยของ ReportName
+// ลงท้าย "(%)" = เปอร์เซ็นต์ นอกนั้น (รวมชื่อที่ไม่มีวงเล็บต่อท้าย) = ppm
+function _qoIsPercentReportName(reportName) {
+  return String(reportName ?? '').includes('(%)');
 }
 
 function _qoIsTrueFlag(value) {
@@ -4460,11 +4489,11 @@ function _qoIsTrueFlag(value) {
   return text === 'true' || text === '1' || text === 'yes' || text === 'y';
 }
 
-function _qoApplyKarlFischerLoq(resultApprove, loqEnabled) {
+function _qoApplyWaterContentLoq(resultApprove, loqEnabled) {
   if (!loqEnabled) return resultApprove;
   const numeric = Number(String(resultApprove ?? '').trim());
-  if (!Number.isFinite(numeric) || numeric >= QO_KARL_FISCHER_LOQ_LIMIT) return resultApprove;
-  return QO_KARL_FISCHER_TRACE_TEXT;
+  if (!Number.isFinite(numeric) || numeric >= QO_WATER_CONTENT_LOQ_LIMIT) return resultApprove;
+  return QO_WATER_CONTENT_TRACE_TEXT;
 }
 
 async function _qoMasterPatternHasLoqColumn() {
@@ -4480,9 +4509,9 @@ async function _qoMasterPatternHasLoqColumn() {
   return (db["recordsets"]?.[0] || []).length > 0;
 }
 
-// Map Request.Id -> true when that request row is a Karl Fischer water content
-// item whose MasterPattern row has LOQ_Karlfischer enabled.
-async function _loadKarlFischerLoqByRequestId(requestIds) {
+// Map Request.Id -> true when that request row is a water content item
+// reported in percent whose MasterPattern row has LOQ_Karlfischer enabled.
+async function _loadWaterContentLoqByRequestId(requestIds) {
   const ids = [...new Set((requestIds || []).map((id) => String(id || '').trim()).filter(Boolean))];
   const loqByRequestId = new Map();
   if (ids.length === 0) return loqByRequestId;
@@ -4493,6 +4522,7 @@ async function _loadKarlFischerLoqByRequestId(requestIds) {
     SELECT
       CONVERT(NVARCHAR(4000), r.[Id]) AS RequestId,
       r.[ItemName] AS ItemName,
+      r.[ReportName] AS ReportName,
       (
         SELECT TOP (1) mp.[LOQ_Karlfischer]
         FROM [QO].[dbo].[MasterPattern] mp
@@ -4505,7 +4535,9 @@ async function _loadKarlFischerLoqByRequestId(requestIds) {
   `);
 
   for (const row of db["recordsets"]?.[0] || []) {
-    const enabled = _qoIsKarlFischerItemName(row.ItemName) && _qoIsTrueFlag(row.LOQ_Karlfischer);
+    const enabled = _qoIsWaterContentLoqItemName(row.ItemName)
+      && _qoIsPercentReportName(row.ReportName)
+      && _qoIsTrueFlag(row.LOQ_Karlfischer);
     loqByRequestId.set(String(row.RequestId || '').trim(), enabled);
   }
   return loqByRequestId;
