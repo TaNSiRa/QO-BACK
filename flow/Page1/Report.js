@@ -250,6 +250,228 @@ function qoBuildReportPath(first, fileBase) {
   return path.join(folder, fileName);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Font fallback
+//
+// Times New Roman ที่ใช้ทำ report ไม่มี glyph อีกหลายตัวที่ผู้ใช้กรอกเข้ามาได้
+// เช่น ตัวยก ⁰⁴⁵⁶⁷⁸⁹⁻⁺, ตัวห้อย ₀-₉, ℃ ℉ ℓ №, หน่วยแบบญี่ปุ่น ㎛ ㎜ ㎡ ㎥ ㎏
+// (pdfkit จะวาดตัวที่ไม่มีออกมาเป็นกรอบสี่เหลี่ยม)
+//
+// วิธีแก้ไล่ตามลำดับ:
+//   1. ตัวที่อยากคุมหน้าตาเอง ใส่ไว้ใน QO_GLYPH_FALLBACK
+//   2. ที่เหลือให้ Unicode ถอดรูปอัตโนมัติ (⁵ -> 5, ₂ -> 2, ㎥ -> m3, № -> No, ℃ -> °C)
+//   3. ถ้ายังวาดไม่ได้อีกให้ตัดทิ้งแล้ว log ไว้ จะได้ตามมาเพิ่มใน map ทีหลัง
+// ─────────────────────────────────────────────────────────────────────────────
+const QO_GLYPH_FALLBACK = {
+  '⁻': '¯', // superscript minus -> macron : (cm⁻¹) จะได้ยังลอยอยู่ข้างบน
+  '⁺': '+',
+  '‐': '-',
+  '‑': '-',
+  'μ': 'µ', // Greek small mu -> micro sign
+};
+
+let qoGlyphFonts = null;
+const qoGlyphResolveCache = new Map();
+const qoGlyphMissingLogged = new Set();
+
+// qoCell / หัวรายงาน วาดด้วย Times เท่านั้น (ชื่อผู้ลงนามภาษาไทยใช้ qoThaiFont คนละทาง)
+// จึงเช็ค glyph กับ times.ttf / timesbd.ttf พอ
+function qoLoadGlyphFonts() {
+  if (qoGlyphFonts) return qoGlyphFonts;
+  qoGlyphFonts = [];
+  try {
+    const fontkit = require('fontkit');
+    for (const file of ['times.ttf', 'timesbd.ttf']) {
+      const fontPath = path.join(__dirname, '../../assets/fonts', file);
+      if (fs.existsSync(fontPath)) qoGlyphFonts.push(fontkit.openSync(fontPath));
+    }
+  } catch (error) {
+    console.warn('QO report: cannot inspect fonts, skip glyph fallback -', error.message);
+  }
+  return qoGlyphFonts;
+}
+
+function qoFontCanDraw(text) {
+  const fonts = qoLoadGlyphFonts();
+  if (fonts.length === 0) return true; // อ่าน font ไม่ได้ ก็ปล่อยข้อความผ่านไปตามเดิม
+  for (const ch of String(text)) {
+    const codePoint = ch.codePointAt(0);
+    if (codePoint < 0x80) continue;
+    for (const font of fonts) {
+      const glyph = font.glyphForCodePoint(codePoint);
+      if (!glyph || glyph.id === 0) return false;
+    }
+  }
+  return true;
+}
+
+function qoResolveGlyph(ch) {
+  if (qoGlyphResolveCache.has(ch)) return qoGlyphResolveCache.get(ch);
+
+  let resolved = ch;
+  if (!qoFontCanDraw(ch)) {
+    const candidates = [
+      QO_GLYPH_FALLBACK[ch],
+      ch.normalize('NFKC'),
+      ch.normalize('NFKD').replace(/[\u0300-\u036F]/g, ''),
+    ];
+    resolved = candidates.find((candidate) => candidate && candidate !== ch && qoFontCanDraw(candidate)) ?? '';
+    if (resolved === '' && !qoGlyphMissingLogged.has(ch)) {
+      qoGlyphMissingLogged.add(ch);
+      const code = ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+      console.warn(`QO report: no glyph for "${ch}" (U+${code}) in Times, character dropped`);
+    }
+  }
+
+  qoGlyphResolveCache.set(ch, resolved);
+  return resolved;
+}
+
+function qoFontSafeText(value) {
+  const text = String(value ?? '');
+  if (qoFontCanDraw(text)) return text;
+  let output = '';
+  for (const ch of text) output += qoResolveGlyph(ch);
+  return output;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ตัวยก / ตัวห้อย
+//
+// Times มี glyph ตัวยกแค่ ¹ ² ³ ตัวที่ขาดอย่าง ⁻ เลยตกไปใช้ ¯ (macron) ซึ่งลอย
+// อยู่ระดับเส้นบนสุด คนละระดับกับ ¹ -> (cm⁻¹) ออกมาเบี้ยวไม่สวย
+//
+// เลิกพึ่ง glyph ตัวยกไปเลย: ถอดเป็นตัวอักษรปกติ (⁻¹ -> −1) แล้ววาดด้วยขนาดที่
+// เล็กลงพร้อมยก baseline เอง ได้ตัวยกที่หน้าตาถูกต้องทุกตัว ไม่ใช่แค่ ¹ ² ³
+// ─────────────────────────────────────────────────────────────────────────────
+const QO_SUPERSCRIPT = {
+  '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+  '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+  '⁻': '\u2212', '⁺': '+', '⁼': '=', '⁽': '(', '⁾': ')', 'ⁿ': 'n', 'ⁱ': 'i',
+};
+const QO_SUBSCRIPT = {
+  '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+  '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9',
+  '₋': '\u2212', '₊': '+', '₌': '=', '₍': '(', '₎': ')', 'ₙ': 'n',
+};
+const QO_SCRIPT_SIZE = 0.62; // ขนาดตัวยก/ตัวห้อย เทียบกับตัวอักษรปกติ
+const QO_SUPER_RISE = 0.33;  // ยก baseline ขึ้นกี่เท่าของ fontSize ปกติ
+const QO_SUB_DROP = 0.14;    // กด baseline ลงกี่เท่าของ fontSize ปกติ
+
+function qoScriptOf(ch) {
+  if (QO_SUPERSCRIPT[ch]) return 1;
+  if (QO_SUBSCRIPT[ch]) return -1;
+  return 0;
+}
+
+function qoHasScript(value) {
+  for (const ch of String(value ?? '')) {
+    if (qoScriptOf(ch)) return true;
+  }
+  return false;
+}
+
+// แตกข้อความเป็นช่วง ๆ ตามชนิด (ปกติ / ตัวยก / ตัวห้อย) พร้อมถอดเป็นตัวอักษรปกติ
+function qoSplitScriptRuns(text) {
+  const runs = [];
+  for (const ch of String(text ?? '')) {
+    const script = qoScriptOf(ch);
+    const mapped = script === 1 ? QO_SUPERSCRIPT[ch] : script === -1 ? QO_SUBSCRIPT[ch] : ch;
+    const last = runs[runs.length - 1];
+    if (last && last.script === script) last.text += mapped;
+    else runs.push({ script, text: mapped });
+  }
+  return runs
+    .map((run) => ({ script: run.script, text: qoFontSafeText(run.text) }))
+    .filter((run) => run.text !== '');
+}
+
+// baseline ของ pdfkit เมื่อวาดที่ y แบบปกติ = y + ascender
+function qoAscent(doc, fontSize) {
+  const ascender = doc._font && typeof doc._font.ascender === 'number' ? doc._font.ascender : 750;
+  return (ascender / 1000) * fontSize;
+}
+
+// ซอยเป็น token ทีละคำ/ช่องว่าง เพื่อให้ตัดบรรทัดได้ (ตัวยกติดกับคำหน้าเสมอ)
+function qoScriptTokens(doc, runs, fontSize) {
+  const tokens = [];
+  for (const run of runs) {
+    doc.fontSize(run.script ? fontSize * QO_SCRIPT_SIZE : fontSize);
+    for (const piece of run.text.split(/(\s+)/)) {
+      if (!piece) continue;
+      tokens.push({
+        script: run.script,
+        text: piece,
+        width: doc.widthOfString(piece),
+        isSpace: /^\s+$/.test(piece),
+      });
+    }
+  }
+  doc.fontSize(fontSize);
+  return tokens;
+}
+
+function qoWrapScriptTokens(tokens, maxWidth) {
+  const lines = [];
+  let parts = [];
+  let width = 0;
+  const flush = () => {
+    while (parts.length && parts[parts.length - 1].isSpace) width -= parts.pop().width;
+    if (parts.length) lines.push({ parts, width });
+    parts = [];
+    width = 0;
+  };
+  for (const token of tokens) {
+    if (token.isSpace && parts.length === 0) continue; // ตัดช่องว่างหัวบรรทัด
+    if (!token.isSpace && parts.length && width + token.width > maxWidth) flush();
+    parts.push(token);
+    width += token.width;
+  }
+  flush();
+  return lines;
+}
+
+// วาดข้อความที่มีตัวยก/ตัวห้อย ลงในกรอบ (x, y, w, h) — คุม align/valign เองทั้งหมด
+function qoDrawScriptText(doc, text, x, y, w, h, options) {
+  const fontSize = options.fontSize;
+  const padding = options.padding;
+  const maxWidth = w - padding * 2;
+
+  const lines = [];
+  for (const rawLine of String(text ?? '').split('\n')) {
+    const wrapped = qoWrapScriptTokens(qoScriptTokens(doc, qoSplitScriptRuns(rawLine), fontSize), maxWidth);
+    if (wrapped.length === 0) lines.push({ parts: [], width: 0 });
+    else lines.push(...wrapped);
+  }
+
+  const lineHeight = doc.currentLineHeight();
+  const totalHeight = lineHeight * lines.length;
+  const top = options.valign === 'top' ? y + 4 : y + Math.max(2, (h - totalHeight) / 2);
+  const ascent = qoAscent(doc, fontSize);
+
+  doc.save();
+  doc.rect(x + padding, y + 1, maxWidth, h - 2).clip();
+  lines.forEach((line, index) => {
+    const baselineY = top + lineHeight * index + ascent;
+    let cursorX = x + padding;
+    if (options.align === 'center') cursorX += Math.max(0, (maxWidth - line.width) / 2);
+    else if (options.align === 'right') cursorX += Math.max(0, maxWidth - line.width);
+
+    for (const part of line.parts) {
+      if (!part.isSpace) {
+        const shift = part.script === 1 ? -fontSize * QO_SUPER_RISE
+          : part.script === -1 ? fontSize * QO_SUB_DROP
+            : 0;
+        doc.fontSize(part.script ? fontSize * QO_SCRIPT_SIZE : fontSize);
+        doc.text(part.text, cursorX, baselineY + shift, { lineBreak: false, baseline: 'alphabetic' });
+      }
+      cursorX += part.width;
+    }
+  });
+  doc.restore();
+  doc.fontSize(fontSize);
+}
+
 function qoFont(doc, bold = false) {
   const font = bold ? 'QO-Times-Bold' : 'QO-Times';
   try {
@@ -523,12 +745,37 @@ async function qoLoadHistoryForSample(sampleRows, maxColumns) {
   return { samples: [...previous, current], values };
 }
 
+function qoFormatReport(first) {
+  return String(first?.FormatReport || first?.Format_Report || '').trim();
+}
+
+// หัวกระดาษที่ทุก FormatReport ใช้ร่วมกัน: กรอบหน้า, โลโก้ + กล่องเลข request และข้อมูลลูกค้า
+function qoDrawResultPageHeader(doc, sampleRows) {
+  const first = sampleRows[0];
+  qoDrawPageFrame(doc);
+  qoDrawLogoAndReportBox(doc, sampleRows);
+
+  const labelX = 70;
+  const valueX = 245;
+  qoFont(doc, true).fontSize(11);
+  doc.text('CUSTOMER NAME:', labelX, 112);
+  doc.text('SAMPLE NAME:', labelX, 132);
+  doc.text('FURNACE:', labelX, 152);
+  doc.text('TEST DATE:', labelX, 172);
+  qoFont(doc, true).fontSize(11);
+  doc.text(qoFontSafeText(first.CustFull || '-'), valueX, 112, { width: 430 });
+  doc.text(qoFontSafeText(first.SampleName || '-'), valueX, 132, { width: 430 });
+  doc.text(qoFontSafeText(first.Furnance || '-'), valueX, 152, { width: 430 });
+  qoDrawTestingPeriod(doc, sampleRows, valueX, 172, 'Times-Bold', 11);
+}
+
 async function qoDrawResultPage(doc, sampleRows, options = {}) {
   const isPreview = options.preview === true;
   const PAGE_W = doc.page.width;
   const PAGE_H = doc.page.height;
   const first = sampleRows[0];
-  const formatReport = String(first.FormatReport || first.Format_Report || '').trim();
+  const formatReport = qoFormatReport(first);
+  if (formatReport === '3') return qoDrawCriteriaResultPage(doc, sampleRows, options);
   const isFormat1 = formatReport === '1';
   const historyColumnCount = isFormat1 ? 7 : 1;
   // preview ยังไม่มี request จริง จึงไม่ต้องไปดึงผลย้อนหลังจาก DB (ทุกช่องผลเว้นว่างไว้)
@@ -547,21 +794,7 @@ async function qoDrawResultPage(doc, sampleRows, options = {}) {
   const rowH = 22;
   const headerH = 44;
 
-  qoDrawPageFrame(doc);
-  qoDrawLogoAndReportBox(doc, sampleRows);
-
-  const labelX = 70;
-  const valueX = 245;
-  qoFont(doc, true).fontSize(11);
-  doc.text('CUSTOMER NAME:', labelX, 112);
-  doc.text('SAMPLE NAME:', labelX, 132);
-  doc.text('FURNACE:', labelX, 152);
-  doc.text('TEST DATE:', labelX, 172);
-  qoFont(doc, true).fontSize(11);
-  doc.text(first.CustFull || '-', valueX, 112, { width: 430 });
-  doc.text(first.SampleName || '-', valueX, 132, { width: 430 });
-  doc.text(first.Furnance || '-', valueX, 152, { width: 430 });
-  qoDrawTestingPeriod(doc, sampleRows, valueX, 172, 'Times-Bold', 11);
+  qoDrawResultPageHeader(doc, sampleRows);
 
   const cols = [
     { title: 'TEST ITEM', w: fixedW[0] },
@@ -623,6 +856,133 @@ async function qoDrawResultPage(doc, sampleRows, options = {}) {
   ], 46, PAGE_H - 80 - y);
   qoCell(doc, tableX, y, fixedTotalW, noteH, remarkText, { align: 'left', boldLabel: true, valign: 'top' });
   qoCell(doc, tableX + fixedTotalW, y, samplingGroupW, noteH, commentText, { align: 'left', boldLabel: true, valign: 'top' });
+
+  qoFooter(doc, PAGE_W, PAGE_H);
+}
+
+// FormatReport = 3 : ตารางแบบ Control Criteria Ranking (ลูกค้าที่ส่ง criteria มาให้เอง)
+// คอลัมน์เรียงซ้ายไปขวาเป็น B- / A / B+ แต่หัวตารางในรายงานแสดงเป็น B / A / B ตามฟอร์มลูกค้า
+const QO_CRITERIA_COLUMNS = [
+  { key: 'Criteria_B-', header: 'B', rank: 'B' },
+  { key: 'Criteria_A', header: 'A', rank: 'A' },
+  { key: 'Criteria_B+', header: 'B', rank: 'B' },
+];
+
+function qoCriteriaText(item, key) {
+  const text = String(item?.[key] ?? '').trim();
+  return !text || text === '-' ? '' : text;
+}
+
+// แปลงข้อความ criteria ให้เป็นช่วงตัวเลข: "168-175" -> 168 ถึง 175,
+// "≤ 1.85" -> ไม่จำกัดล่างถึง 1.85, "≥ 0.5" -> 0.5 ขึ้นไป, ตัวเลขเดี่ยวถือว่าตรงค่านั้นค่าเดียว
+function qoParseCriteriaRange(value) {
+  const text = String(value ?? '').replace(/,/g, '').trim();
+  if (!text || text === '-') return null;
+
+  const range = text.match(/^(-?\d+(?:\.\d+)?)\s*[-–—~]\s*(-?\d+(?:\.\d+)?)$/);
+  if (range) {
+    const a = Number(range[1]);
+    const b = Number(range[2]);
+    return { lower: Math.min(a, b), upper: Math.max(a, b) };
+  }
+
+  const limit = qoLimit(text);
+  if (!limit) return null;
+  if (limit.type === 'max') return { lower: -Infinity, upper: limit.value };
+  if (limit.type === 'min') return { lower: limit.value, upper: Infinity };
+  return { lower: limit.value, upper: limit.value };
+}
+
+// Rank = ช่วง criteria ที่ผลตรวจตกอยู่ (ทั้ง B- และ B+ รายงานเป็น "B" เหมือนกัน)
+// ถ้าไม่อยู่ในช่วงไหนเลย หรือผลยังไม่เป็นตัวเลข ให้เป็น "-"
+function qoCriteriaRank(item, value) {
+  const result = qoNumber(value);
+  if (result === null) return '-';
+  for (const column of QO_CRITERIA_COLUMNS) {
+    const range = qoParseCriteriaRange(qoCriteriaText(item, column.key));
+    if (range && result >= range.lower && result <= range.upper) return column.rank;
+  }
+  return '-';
+}
+
+function qoDrawCriteriaResultPage(doc, sampleRows, options = {}) {
+  const isPreview = options.preview === true;
+  const PAGE_W = doc.page.width;
+  const PAGE_H = doc.page.height;
+
+  const fixedW = [170, 74, 82];
+  const criteriaW = 85;
+  const resultW = 100;
+  const rankW = 65;
+  const fixedTotalW = fixedW.reduce((sum, value) => sum + value, 0);
+  const criteriaTotalW = criteriaW * QO_CRITERIA_COLUMNS.length;
+  const leftGroupW = fixedTotalW + criteriaTotalW;
+  const resultGroupW = resultW + rankW;
+  const tableW = leftGroupW + resultGroupW;
+  const tableX = (PAGE_W - tableW) / 2;
+  const tableY = 190;
+  const rowH = 22;
+  const headerH = 44;
+
+  qoDrawResultPageHeader(doc, sampleRows);
+
+  let x = tableX;
+  const cols = [
+    { title: 'TEST ITEM', w: fixedW[0] },
+    { title: 'Test\ncondition', w: fixedW[1] },
+    { title: 'New Oil\n(Supplier)', w: fixedW[2] },
+  ];
+  for (const col of cols) {
+    qoCell(doc, x, tableY, col.w, headerH, col.title, { bg: '#DDEBF7', bold: true, align: 'center', fontSize: 10.5 });
+    x += col.w;
+  }
+  qoCell(doc, x, tableY, criteriaTotalW, 20, '**Control Criteria Ranking', { bg: '#DDEBF7', bold: true, align: 'center', fontSize: 10.5 });
+  let cx = x;
+  for (const column of QO_CRITERIA_COLUMNS) {
+    qoCell(doc, cx, tableY + 20, criteriaW, 24, column.header, { bg: '#DDEBF7', bold: true, align: 'center', fontSize: 10.5 });
+    cx += criteriaW;
+  }
+  x += criteriaTotalW;
+  qoCell(doc, x, tableY, resultW, headerH, 'Result', { bg: '#DDEBF7', bold: true, align: 'center', fontSize: 10.5 });
+  x += resultW;
+  qoCell(doc, x, tableY, rankW, headerH, 'Rank', { bg: '#DDEBF7', bold: true, align: 'center', fontSize: 10.5 });
+
+  let y = tableY + headerH;
+  qoFont(doc).fontSize(8.5);
+  for (const item of sampleRows) {
+    x = tableX;
+    qoCell(doc, x, y, fixedW[0], rowH, item.ReportName || item.ItemName || '', { align: 'left' });
+    x += fixedW[0];
+    qoCell(doc, x, y, fixedW[1], rowH, item.TestCondition || '-', { align: 'center' });
+    x += fixedW[1];
+    qoCell(doc, x, y, fixedW[2], rowH, item.NewOil || '-', { align: 'center' });
+    x += fixedW[2];
+    for (const column of QO_CRITERIA_COLUMNS) {
+      qoCell(doc, x, y, criteriaW, rowH, qoCriteriaText(item, column.key), { align: 'center' });
+      x += criteriaW;
+    }
+    const value = isPreview ? '' : qoResultText(item);
+    qoCell(doc, x, y, resultW, rowH, value, {
+      align: 'center',
+      color: qoIsOutOfSpec(item, value) ? '#FF0000' : null,
+    });
+    x += resultW;
+    qoCell(doc, x, y, rankW, rowH, isPreview ? '' : qoCriteriaRank(item, value), { align: 'center' });
+    y += rowH;
+  }
+
+  // ตามฟอร์มลูกค้า: Remark กว้างเท่าคอลัมน์ TEST ITEM ถึง New Oil
+  // ส่วน Comment กว้างตั้งแต่คอลัมน์ criteria ยาวไปจนสุดคอลัมน์ Rank
+  const remarkW = fixedTotalW;
+  const commentW = criteriaTotalW + resultGroupW;
+  const remarkText = `Remark:\n${qoRemarkText(sampleRows)}`;
+  const commentText = `Comment: ${isPreview ? '-' : qoBuildComments(sampleRows)}`;
+  const noteH = qoNoteHeight(doc, [
+    { text: remarkText, w: remarkW },
+    { text: commentText, w: commentW },
+  ], 46, PAGE_H - 80 - y);
+  qoCell(doc, tableX, y, remarkW, noteH, remarkText, { align: 'left', boldLabel: true, valign: 'top' });
+  qoCell(doc, tableX + remarkW, y, commentW, noteH, commentText, { align: 'left', boldLabel: true, valign: 'top' });
 
   qoFooter(doc, PAGE_W, PAGE_H);
 }
@@ -884,7 +1244,19 @@ function qoCell(doc, x, y, w, h, text, options = {}) {
   const align = options.align || 'center';
   const valign = options.valign || 'center';
   const padding = 4;
-  const content = String(text ?? '');
+
+  // มีตัวยก/ตัวห้อย -> วาดเองทีละช่วง (doc.text ปกติวาดตัวยกให้สวยไม่ได้)
+  if (qoHasScript(text)) {
+    qoDrawScriptText(doc, text, x, y, w, h, {
+      fontSize: options.fontSize || 8.5,
+      align,
+      valign,
+      padding,
+    });
+    doc.fillColor('black');
+    return;
+  }
+  const content = qoFontSafeText(text);
   const textWidth = w - padding * 2;
   const explicitLines = content.split('\n');
   const shouldCenterExplicitLines = valign !== 'top' &&

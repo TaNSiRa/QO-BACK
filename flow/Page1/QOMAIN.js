@@ -370,7 +370,10 @@ router.post('/QO/getMasterPattern', async (req, res) => {
                 [Max],
                 [Remark],
                 [FormatReport],
-                [LOQ_Karlfischer]
+                [LOQ_Karlfischer],
+                [Criteria_B-],
+                [Criteria_A],
+                [Criteria_B+]
               FROM [QO].[dbo].[MasterPattern]
               ORDER BY [CustFull], [SampleNo], [ItemNo];`;
   let db = await mssql.qurey(query);
@@ -659,6 +662,10 @@ router.post('/QO/CreateRequest', async (req, res) => {
       pushField("Max", item.Max);
       pushField("Remark", item.Remark);
       pushField("FormatReport", item.FormatReport);
+      // Control Criteria Ranking (FormatReport = 3) ติดมาจาก MasterPattern ตอนสร้าง request
+      pushField("Criteria_B-", item["Criteria_B-"]);
+      pushField("Criteria_A", item["Criteria_A"]);
+      pushField("Criteria_B+", item["Criteria_B+"]);
       pushField("SamplingDate", item.SamplingDate);
       pushField("Cost", requestCostForItem(item, sampleCode));
       pushField("RequestStatus", "WAIT SAMPLE");
@@ -2315,8 +2322,8 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
     const result2Sql = result2 === '' || result2 === null || result2 === undefined
       ? 'NULL'
       : `N'${_esc(result2)}'`;
-    const requestResult1Sql = _sqlTextValue(_qoRequestResultValue(req.body, 'RequestResult_1', 'Result_1'));
-    const requestResult2Sql = _sqlTextValue(_qoRequestResultValue(req.body, 'RequestResult_2', 'Result_2'));
+    const requestResult1Sql = _qoRequestResultSql(req.body, 1);
+    const requestResult2Sql = _qoRequestResultSql(req.body, 2);
     const resultPpm1 = req.body.Result_ppm_1;
     const resultPpm2 = req.body.Result_ppm_2;
     const resultPpm1Sql = resultPpm1 === '' || resultPpm1 === null || resultPpm1 === undefined
@@ -2484,14 +2491,14 @@ router.post('/QO/InstrumentResultSave', async (req, res) => {
           [UserAnalysis] = ${userAnalysisSql},
           [AnalysisDate] = ${analysisDateSql},
           [ItemStatus] = @NextItemStatus,
-          [Result_1] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${requestResult1Sql} ELSE [Result_1] END,
-          [Result_2] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${requestResult2Sql} ELSE [Result_2] END,
-          [Result_3] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${requestResult1Sql} ELSE [Result_3] END,
-          [Result_4] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${requestResult2Sql} ELSE [Result_4] END,
-          [Result_5] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${requestResult1Sql} ELSE [Result_5] END,
-          [Result_6] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${requestResult2Sql} ELSE [Result_6] END,
-          [Result_7] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${requestResult1Sql} ELSE [Result_7] END,
-          [Result_8] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${requestResult2Sql} ELSE [Result_8] END
+          [Result_1] = CASE WHEN ${_qoCurrentStageCondition('ITEM')} THEN ${requestResult1Sql} ELSE [Result_1] END,
+          [Result_2] = CASE WHEN ${_qoCurrentStageCondition('ITEM')} THEN ${requestResult2Sql} ELSE [Result_2] END,
+          [Result_3] = CASE WHEN ${_qoCurrentStageCondition('RECHECK 1')} THEN ${requestResult1Sql} ELSE [Result_3] END,
+          [Result_4] = CASE WHEN ${_qoCurrentStageCondition('RECHECK 1')} THEN ${requestResult2Sql} ELSE [Result_4] END,
+          [Result_5] = CASE WHEN ${_qoCurrentStageCondition('RECHECK 2')} THEN ${requestResult1Sql} ELSE [Result_5] END,
+          [Result_6] = CASE WHEN ${_qoCurrentStageCondition('RECHECK 2')} THEN ${requestResult2Sql} ELSE [Result_6] END,
+          [Result_7] = CASE WHEN ${_qoCurrentStageCondition('RECONFIRM')} THEN ${requestResult1Sql} ELSE [Result_7] END,
+          [Result_8] = CASE WHEN ${_qoCurrentStageCondition('RECONFIRM')} THEN ${requestResult2Sql} ELSE [Result_8] END
         WHERE CONVERT(NVARCHAR(4000), [Id]) = @RequestId;
 
         IF @@ROWCOUNT = 0
@@ -2728,10 +2735,10 @@ router.post('/QO/CoolingCurveResultSave', async (req, res) => {
           [UserAnalysis] = ${userAnalysisSql},
           [AnalysisDate] = ${analysisDateSql},
           [ItemStatus] = @NextItemStatus,
-          [Result_1] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST ITEM' THEN ${result1Sql} ELSE [Result_1] END,
-          [Result_3] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 1' THEN ${result1Sql} ELSE [Result_3] END,
-          [Result_5] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECHECK 2' THEN ${result1Sql} ELSE [Result_5] END,
-          [Result_7] = CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) = N'LIST RECONFIRM' THEN ${result1Sql} ELSE [Result_7] END
+          [Result_1] = CASE WHEN ${_qoCurrentStageCondition('ITEM')} THEN ${result1Sql} ELSE [Result_1] END,
+          [Result_3] = CASE WHEN ${_qoCurrentStageCondition('RECHECK 1')} THEN ${result1Sql} ELSE [Result_3] END,
+          [Result_5] = CASE WHEN ${_qoCurrentStageCondition('RECHECK 2')} THEN ${result1Sql} ELSE [Result_5] END,
+          [Result_7] = CASE WHEN ${_qoCurrentStageCondition('RECONFIRM')} THEN ${result1Sql} ELSE [Result_7] END
         WHERE CONVERT(NVARCHAR(4000), [Id]) = @RequestId;
 
         IF @@ROWCOUNT = 0
@@ -3037,7 +3044,7 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
     let allQueries = '';
     await loadHolidays();
 
-    const waterContentLoqByRequestId = await _loadWaterContentLoqByRequestId(
+    const waterContentInfoByRequestId = await _loadWaterContentReportInfoByRequestId(
       rows
         .filter((row) => (row.Action || '').toString().trim().toUpperCase() === 'APPROVE')
         .map((row) => row.Id)
@@ -3067,13 +3074,15 @@ router.post('/QO/InstrumentApproveItems', async (req, res) => {
       if (action === 'APPROVE') {
         // มี Error = ไม่เอาค่าเฉลี่ย Result 1/2 แต่เก็บตัวย่อของ Error แทน
         const errorAbbreviation = _qoErrorAbbreviation(row.ErrorType);
-        const averagedResult = (row.ResultApprove || _qoAverageResultText(row.Result_1, row.Result_2)).toString();
+        const reportInfo = waterContentInfoByRequestId.get(requestId);
+        // P30/P31 ส่งมาทั้ง ppm และ % ให้เลือกตาม ReportName ที่ Request เก็บไว้
+        const waterContentAverage = _qoWaterContentAverageText(row, reportInfo?.isPercent === true);
+        const averagedResult = (
+          waterContentAverage || row.ResultApprove || _qoAverageResultText(row.Result_1, row.Result_2)
+        ).toString();
         const resultApprove = errorAbbreviation
           ? errorAbbreviation
-          : _qoApplyWaterContentLoq(
-            averagedResult,
-            waterContentLoqByRequestId.get(requestId) === true
-          );
+          : _qoApplyWaterContentLoq(averagedResult, reportInfo?.loqEnabled === true);
         const resultApproveSql = _sqlTextValue(resultApprove);
         const instrumentSetters = [
           ...instrumentEditableSetters,
@@ -4013,6 +4022,9 @@ function _qoRequestStructureColumns(alias = '') {
     'Max',
     'Remark',
     'FormatReport',
+    'Criteria_B-',
+    'Criteria_A',
+    'Criteria_B+',
     'ReqSection',
     'ReqDate',
     'ReqUser',
@@ -4391,9 +4403,26 @@ function _qoApprovalInstrumentEditableSetters(row, optionalColumnsForTable) {
   return setters;
 }
 
+// รอบการวิเคราะห์ของ Request.Result_1..8 : LIST กับ FINISH ของรอบเดียวกัน
+// ถือเป็นรอบเดียวกัน กด Save ซ้ำตอนสถานะเป็น FINISH แล้วจึงยังเขียนทับช่องเดิมได้
+// (ตรงกับที่ _qoApprovalRequestResultSetters ใช้ตอน approve)
+const QO_RESULT_STAGE_STATUSES = new Map([
+  ['ITEM', ['LIST ITEM', 'FINISH ITEM']],
+  ['RECHECK 1', ['LIST RECHECK 1', 'FINISH RECHECK 1']],
+  ['RECHECK 2', ['LIST RECHECK 2', 'FINISH RECHECK 2']],
+  ['RECONFIRM', ['LIST RECONFIRM', 'FINISH RECONFIRM']],
+]);
+
+// ใช้ได้ในคิวรีที่ประกาศ @CurrentItemStatus ไว้แล้วเท่านั้น
+function _qoCurrentStageCondition(stage) {
+  const statuses = QO_RESULT_STAGE_STATUSES.get(stage) || [];
+  const list = statuses.map((status) => `N'${_esc(status)}'`).join(', ');
+  return `UPPER(LTRIM(RTRIM(ISNULL(@CurrentItemStatus, N'')))) IN (${list})`;
+}
+
 function _qoApprovalRequestResultSetters(status, row, isCoolingCurve) {
-  const result1Sql = _sqlTextValue(_qoRequestResultValue(row, 'RequestResult_1', 'Result_1'));
-  const result2Sql = _sqlTextValue(_qoRequestResultValue(row, 'RequestResult_2', 'Result_2'));
+  const result1Sql = _qoRequestResultSql(row, 1);
+  const result2Sql = _qoRequestResultSql(row, 2);
 
   switch (String(status || '').trim().toUpperCase()) {
     case 'LIST ITEM':
@@ -4422,13 +4451,60 @@ function _qoApprovalRequestResultSetters(status, row, isCoolingCurve) {
 }
 
 // Request.Result_1..8 ปกติเก็บค่าเดียวกับ Result_1/Result_2 ของตารางเครื่องมือ
-// แต่บางหน้า (เช่น P30 Karl Fischer) ต้องเก็บค่าจากคอลัมน์ ppm แทนคอลัมน์ %
-// จึงส่ง RequestResult_1/RequestResult_2 มา override ได้
+// แต่บางหน้าต้องเก็บค่าจากคอลัมน์อื่น จึงส่ง RequestResult_1/RequestResult_2
+// มา override ได้
 function _qoRequestResultValue(source, overrideKey, defaultKey) {
   if (source && Object.prototype.hasOwnProperty.call(source, overrideKey)) {
     return source[overrideKey];
   }
   return source ? source[defaultKey] : undefined;
+}
+
+// ── หน่วยของ Water content ที่เก็บลง Request (P30 / P31) ────────────────────
+// สองหน้านี้ส่งค่ามาทั้งสองหน่วย backend จึงเลือกเองจาก Request.ReportName
+// แทนที่จะเชื่อค่าที่ client เลือกมาให้ ผลลัพธ์จะได้ไม่ขึ้นกับว่าเครื่องที่กด
+// save/approve รัน bundle เวอร์ชันไหน
+//   P31 Distillation : Result_1/2 = ppm, Result_pct_1/2 = %
+//   P30 Karl Fischer : Result_1/2 = %,   Result_ppm_1/2 = ppm
+// หน้าอื่นไม่ได้ส่งคู่คอลัมน์นี้มา จึงคืน null แล้วไปใช้ทางเดิม
+function _qoWaterContentUnitPair(source, index) {
+  if (!source) return null;
+  const has = (key) => Object.prototype.hasOwnProperty.call(source, key);
+  if (has(`Result_pct_${index}`)) {
+    return { percent: source[`Result_pct_${index}`], ppm: source[`Result_${index}`] };
+  }
+  if (has(`Result_ppm_${index}`)) {
+    return { percent: source[`Result_${index}`], ppm: source[`Result_ppm_${index}`] };
+  }
+  return null;
+}
+
+// ใช้ได้เฉพาะภายใน UPDATE [QO].[dbo].[Request] เท่านั้น เพราะอ้าง [ReportName]
+// ของแถวที่กำลังอัปเดตอยู่
+function _qoRequestResultSql(source, index) {
+  const pair = _qoWaterContentUnitPair(source, index);
+  if (!pair) {
+    return _sqlTextValue(_qoRequestResultValue(source, `RequestResult_${index}`, `Result_${index}`));
+  }
+  const percentSql = _sqlTextValue(pair.percent);
+  const ppmSql = _sqlTextValue(pair.ppm);
+  // สองหน่วยให้ค่าเดียวกันก็ไม่ต้องมี CASE — และถ้าทั้งคู่ว่าง (เช่นกรอกแค่
+  // Result 1 ไม่ได้กรอก Result 2) CASE ที่ทุกกิ่งเป็น NULL ล้วนจะทำให้
+  // SQL Server ฟ้อง 'At least one of the result expressions in a CASE
+  // specification must be an expression other than the NULL constant'
+  if (percentSql === ppmSql) return percentSql;
+  return `CASE WHEN CHARINDEX(N'(%)', ISNULL(CONVERT(NVARCHAR(4000), [ReportName]), N'')) > 0
+            THEN ${percentSql}
+            ELSE ${ppmSql} END`;
+}
+
+// ค่าเฉลี่ยของ Water content ตามหน่วยที่รายงาน (null = หน้านี้ไม่ได้ส่งคู่คอลัมน์มา)
+function _qoWaterContentAverageText(source, isPercent) {
+  const pair1 = _qoWaterContentUnitPair(source, 1);
+  const pair2 = _qoWaterContentUnitPair(source, 2);
+  if (!pair1 && !pair2) return null;
+  const pick = (pair) => (pair ? (isPercent ? pair.percent : pair.ppm) : '');
+  return _qoAverageResultText(pick(pair1), pick(pair2));
 }
 
 function _qoAverageResultText(result1, result2) {
@@ -4509,38 +4585,43 @@ async function _qoMasterPatternHasLoqColumn() {
   return (db["recordsets"]?.[0] || []).length > 0;
 }
 
-// Map Request.Id -> true when that request row is a water content item
-// reported in percent whose MasterPattern row has LOQ_Karlfischer enabled.
-async function _loadWaterContentLoqByRequestId(requestIds) {
+// Map Request.Id -> { isPercent, loqEnabled } อ่านจากแถวใน Request โดยตรง
+//   isPercent  : ReportName ลงท้าย "(%)" (ตัวตัดสินหน่วยของค่าที่เก็บลง Request)
+//   loqEnabled : เป็นรายการ water content ที่รายงานเป็น % และ MasterPattern
+//                เปิด LOQ_Karlfischer ไว้ -> ค่าที่ต่ำกว่า LOQ รายงานเป็น "Tr"
+async function _loadWaterContentReportInfoByRequestId(requestIds) {
   const ids = [...new Set((requestIds || []).map((id) => String(id || '').trim()).filter(Boolean))];
-  const loqByRequestId = new Map();
-  if (ids.length === 0) return loqByRequestId;
-  if (!(await _qoMasterPatternHasLoqColumn())) return loqByRequestId;
+  const infoByRequestId = new Map();
+  if (ids.length === 0) return infoByRequestId;
 
+  const hasLoqColumn = await _qoMasterPatternHasLoqColumn();
   const idList = ids.map((id) => `N'${_esc(id)}'`).join(', ');
   const db = await mssql.qurey(`
     SELECT
       CONVERT(NVARCHAR(4000), r.[Id]) AS RequestId,
       r.[ItemName] AS ItemName,
       r.[ReportName] AS ReportName,
-      (
+      ${hasLoqColumn ? `(
         SELECT TOP (1) mp.[LOQ_Karlfischer]
         FROM [QO].[dbo].[MasterPattern] mp
         WHERE mp.[CustShort] = r.[CustShort]
           AND mp.[SampleNo] = r.[SampleNo]
           AND mp.[ItemName] = r.[ItemName]
-      ) AS LOQ_Karlfischer
+      )` : 'NULL'} AS LOQ_Karlfischer
     FROM [QO].[dbo].[Request] r
     WHERE CONVERT(NVARCHAR(4000), r.[Id]) IN (${idList});
   `);
 
   for (const row of db["recordsets"]?.[0] || []) {
-    const enabled = _qoIsWaterContentLoqItemName(row.ItemName)
-      && _qoIsPercentReportName(row.ReportName)
-      && _qoIsTrueFlag(row.LOQ_Karlfischer);
-    loqByRequestId.set(String(row.RequestId || '').trim(), enabled);
+    const isPercent = _qoIsPercentReportName(row.ReportName);
+    infoByRequestId.set(String(row.RequestId || '').trim(), {
+      isPercent,
+      loqEnabled: _qoIsWaterContentLoqItemName(row.ItemName)
+        && isPercent
+        && _qoIsTrueFlag(row.LOQ_Karlfischer),
+    });
   }
-  return loqByRequestId;
+  return infoByRequestId;
 }
 
 function _qoDecimalPlaces(value) {
