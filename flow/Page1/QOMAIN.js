@@ -4565,11 +4565,20 @@ function _qoIsTrueFlag(value) {
   return text === 'true' || text === '1' || text === 'yes' || text === 'y';
 }
 
+// P31 รายงานค่าที่ต่ำกว่าเกณฑ์ collect water เป็นข้อความ "<100"/"<200" ppm
+// (= "<0.01"/"<0.02" %) ค่าพวกนี้ Number() แปลงไม่ได้ จึงต้องแยกเครื่องหมาย
+// "<" ออกก่อน — "<v" หมายถึงค่าจริงน้อยกว่า v ดังนั้นถ้า v <= LOQ ก็อยู่ใต้ LOQ แน่นอน
 function _qoApplyWaterContentLoq(resultApprove, loqEnabled) {
   if (!loqEnabled) return resultApprove;
-  const numeric = Number(String(resultApprove ?? '').trim());
-  if (!Number.isFinite(numeric) || numeric >= QO_WATER_CONTENT_LOQ_LIMIT) return resultApprove;
-  return QO_WATER_CONTENT_TRACE_TEXT;
+  const text = String(resultApprove ?? '').trim();
+  if (text === '') return resultApprove; // Number('') = 0 จะกลายเป็น Tr ทั้งที่ยังไม่มีผล
+  const isLessThan = _qoIsLessThanResultText(text);
+  const numeric = Number(isLessThan ? text.slice(1).trim() : text);
+  if (!Number.isFinite(numeric)) return resultApprove;
+  const belowLoq = isLessThan
+    ? numeric <= QO_WATER_CONTENT_LOQ_LIMIT
+    : numeric < QO_WATER_CONTENT_LOQ_LIMIT;
+  return belowLoq ? QO_WATER_CONTENT_TRACE_TEXT : resultApprove;
 }
 
 async function _qoMasterPatternHasLoqColumn() {
