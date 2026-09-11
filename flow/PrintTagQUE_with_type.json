@@ -1,0 +1,258 @@
+[
+  {
+    "id": "609784f0b8af7547",
+    "type": "http in",
+    "z": "d529efd1.6322b",
+    "name": "",
+    "url": "/SAR/PrintTagQUE",
+    "method": "post",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 190,
+    "y": 2280,
+    "wires": [
+      [
+        "f1bd0306aad9415c",
+        "6c46eae3a809b993",
+        "6a0102778dbd5f5a"
+      ]
+    ]
+  },
+  {
+    "id": "f1bd0306aad9415c",
+    "type": "http response",
+    "z": "d529efd1.6322b",
+    "name": "",
+    "statusCode": "",
+    "headers": {},
+    "x": 330,
+    "y": 2220,
+    "wires": []
+  },
+  {
+    "id": "6c46eae3a809b993",
+    "type": "debug",
+    "z": "d529efd1.6322b",
+    "name": "debug 6",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 260,
+    "y": 2400,
+    "wires": []
+  },
+  {
+    "id": "6a0102778dbd5f5a",
+    "type": "function",
+    "z": "d529efd1.6322b",
+    "name": "Print QUE",
+    "func": "let datain = msg.payload;\n\n// แปลง body จาก string -> object\nlet body = typeof datain.body === \"string\"\n    ? JSON.parse(datain.body || \"{}\")\n    : (datain.body || {});\n\nfunction pick(...values) {\n    for (const value of values) {\n        if (value !== undefined && value !== null && String(value).trim() !== \"\") {\n            return String(value);\n        }\n    }\n    return \"-\";\n}\n\nfunction formatDate(dateStr) {\n    if (!dateStr || dateStr === \"-\") return \"-\";\n\n    const parts = String(dateStr).split(\"-\");\n    if (parts.length !== 3) return dateStr;\n\n    const [year, month, day] = parts;\n    return `${day}-${month}-${year.slice(-2)}`;\n}\n\nlet samplePreparationText = body.sample_preparation || \"\";\nsamplePreparationText = samplePreparationText\n    .replace(/₀/g, \"0\")\n    .replace(/₁/g, \"1\")\n    .replace(/₂/g, \"2\")\n    .replace(/₃/g, \"3\")\n    .replace(/₄/g, \"4\")\n    .replace(/₅/g, \"5\")\n    .replace(/₆/g, \"6\")\n    .replace(/₇/g, \"7\")\n    .replace(/₈/g, \"8\")\n    .replace(/₉/g, \"9\")\n    .replace(/≤/g, \"<=\")\n    .replace(/≥/g, \">=\")\n    .replace(/°/g, \"o\")\n    .replace(/˚/g, \"o\")\n    .replace(/µ/g, \"u\")\n    .replace(/α/g, \"a\");\n\nlet sampleCode = pick(body.SampleCode, body.sample_code, datain.reqNo);\nlet samplingDate = formatDate(pick(body.SamplingDate, body.sampling_date));\n// Type ('Special' / 'Service lab') พิมพ์ต่อใต้ Sampling date\nlet requestType = pick(body.Type, body.type);\nlet furnance = pick(body.Furnance, body.furnance);\nlet sampleName = pick(body.SampleName, body.lot_no);\nlet customerName = pick(body.CustFull, body.sample_name);\n\nlet output = [];\n\noutput.push({\n    payload: `\n^XA\n^CF0,20\n^FO0,0^GB400,550,3^FS\n\n^FO70,190^BQN,2,6,M^FDMM, ${sampleCode}^FS\n\n^FO225,30^A0R,20,20^FDSampling date:^FS\n^FO225,220^A0R,20,20^FD${samplingDate}^FS\n\n^FO255,30^A0R,20,20^FDType:^FS\n^FO255,220^A0R,20,20^FD${requestType}^FS\n\n^FO285,30^A0R,20,20^FDFurnance:^FS\n^FO285,220^A0R,20,20^FD${furnance}^FS\n\n^FO315,30^A0R,20,20^FDSample name:^FS\n^FO315,220^A0R,20,20^FD${sampleName}^FS\n\n^FO345,30^A0R,20,20^FDCustomer name:^FS\n^FO345,220^A0R,20,20^FD${customerName}^FS\n\n^FO375,30^A0R,20,20^FDCode:^FS\n^FO375,220^A0R,20,20^FD${sampleCode}^FS\n\n^XZ\n`\n});\n\nlet printer = datain.printer;\n\nif (printer === \"BPMKT\") {\n    return [output, null, null, null];\n} else if (printer === \"BPTTC\") {\n    return [null, output, null, null];\n} else if (printer === \"RYMKT\") {\n    return [null, null, output, null];\n} else if (printer === \"RYTTC\") {\n    return [null, null, null, output];\n}\n\nreturn [null, null, null, null];",
+    "outputs": 4,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 2280,
+    "wires": [
+      [
+        "13b84d51419b33b6"
+      ],
+      [
+        "cfef6d3cfb4085e8"
+      ],
+      [
+        "fbbe4134c32b0ce4"
+      ],
+      [
+        "72a430e28816ac09",
+        "d6e241c2f680028b"
+      ]
+    ]
+  },
+  {
+    "id": "13b84d51419b33b6",
+    "type": "delay",
+    "z": "d529efd1.6322b",
+    "name": "Delay 500ms",
+    "pauseType": "rate",
+    "timeout": "100",
+    "timeoutUnits": "milliseconds",
+    "rate": "1",
+    "nbRateUnits": "0.5",
+    "rateUnits": "second",
+    "randomFirst": "",
+    "randomLast": "",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 590,
+    "y": 2280,
+    "wires": [
+      [
+        "c765ef369a4e2b81"
+      ]
+    ]
+  },
+  {
+    "id": "cfef6d3cfb4085e8",
+    "type": "delay",
+    "z": "d529efd1.6322b",
+    "name": "Delay 500ms",
+    "pauseType": "rate",
+    "timeout": "100",
+    "timeoutUnits": "milliseconds",
+    "rate": "1",
+    "nbRateUnits": "0.5",
+    "rateUnits": "second",
+    "randomFirst": "",
+    "randomLast": "",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 590,
+    "y": 2320,
+    "wires": [
+      [
+        "5767d244a98b0ce7"
+      ]
+    ]
+  },
+  {
+    "id": "fbbe4134c32b0ce4",
+    "type": "delay",
+    "z": "d529efd1.6322b",
+    "name": "Delay 500ms",
+    "pauseType": "rate",
+    "timeout": "100",
+    "timeoutUnits": "milliseconds",
+    "rate": "1",
+    "nbRateUnits": "0.5",
+    "rateUnits": "second",
+    "randomFirst": "",
+    "randomLast": "",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 590,
+    "y": 2360,
+    "wires": [
+      [
+        "c0f9ae18c4aa98a1"
+      ]
+    ]
+  },
+  {
+    "id": "72a430e28816ac09",
+    "type": "debug",
+    "z": "d529efd1.6322b",
+    "name": "debug 7",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 540,
+    "y": 2220,
+    "wires": []
+  },
+  {
+    "id": "d6e241c2f680028b",
+    "type": "delay",
+    "z": "d529efd1.6322b",
+    "name": "Delay 500ms",
+    "pauseType": "rate",
+    "timeout": "100",
+    "timeoutUnits": "milliseconds",
+    "rate": "1",
+    "nbRateUnits": "0.5",
+    "rateUnits": "second",
+    "randomFirst": "",
+    "randomLast": "",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 590,
+    "y": 2400,
+    "wires": [
+      [
+        "31d4edacbc32de59"
+      ]
+    ]
+  },
+  {
+    "id": "c765ef369a4e2b81",
+    "type": "udp out",
+    "z": "d529efd1.6322b",
+    "name": "Printer BP MKT for use at RY",
+    "addr": "172.20.47.19",
+    "iface": "",
+    "port": "9200",
+    "ipv": "udp4",
+    "outport": "",
+    "base64": false,
+    "multicast": "false",
+    "x": 800,
+    "y": 2280,
+    "wires": []
+  },
+  {
+    "id": "5767d244a98b0ce7",
+    "type": "udp out",
+    "z": "d529efd1.6322b",
+    "name": "TTC BANGPOO (Lab, 2nd Floor)",
+    "addr": "172.101.33.48",
+    "iface": "",
+    "port": "9200",
+    "ipv": "udp4",
+    "outport": "",
+    "base64": false,
+    "multicast": "false",
+    "x": 820,
+    "y": 2320,
+    "wires": []
+  },
+  {
+    "id": "c0f9ae18c4aa98a1",
+    "type": "udp out",
+    "z": "d529efd1.6322b",
+    "name": "Printer RY MKT",
+    "addr": "172.20.47.16",
+    "iface": "",
+    "port": "9200",
+    "ipv": "udp4",
+    "outport": "",
+    "base64": false,
+    "multicast": "false",
+    "x": 760,
+    "y": 2360,
+    "wires": []
+  },
+  {
+    "id": "31d4edacbc32de59",
+    "type": "udp out",
+    "z": "d529efd1.6322b",
+    "name": "Printer RY TTC",
+    "addr": "172.20.47.17",
+    "iface": "",
+    "port": "9200",
+    "ipv": "udp4",
+    "outport": "",
+    "base64": false,
+    "multicast": "false",
+    "x": 760,
+    "y": 2400,
+    "wires": []
+  }
+]

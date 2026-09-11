@@ -190,3 +190,51 @@
   }
 }
 --------------------------------------------------
+{
+  "timestamp": "2026-09-11 16:51:54",
+  "level": "ERROR",
+  "message": "Database query failed",
+  "data": {
+    "error": {
+      "message": "Invalid column name 'Type'.",
+      "stack": "RequestError: Invalid column name 'Type'.\n    at handleError (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\mssql\\lib\\tedious\\request.js:388:15)\n    at Connection.emit (node:events:524:28)\n    at Connection.emit (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\connection.js:1071:18)\n    at Parser.<anonymous> (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\connection.js:1176:12)\n    at Parser.emit (node:events:524:28)\n    at Readable.<anonymous> (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:27:14)\n    at Readable.emit (node:events:524:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:538:3)\n    at Readable.push (node:internal/streams/readable:393:5)",
+      "name": "RequestError"
+    },
+    "context": {
+      "query": "\n  SELECT [Id],\n      [ReqNo],\n      [SampleCode],\n      [RequestStatus],\n      [SampleStatus],\n      [ItemStatus],\n      [CustFull],\n      [CustShort],\n      [SampleNo],\n      [SampleName],\n      [Furnance],\n      [Instrument],\n      [ItemNo],\n      [ItemName],\n      [ReportName],\n      [TestCondition],\n      [NewOil],\n      [Min],\n      [Max],\n      [Remark],\n      [FormatReport],\n      [Criteria_B-],\n      [Criteria_A],\n      [Criteria_B+],\n      [ReqSection],\n      [ReqDate],\n      [ReqUser],\n      [Type],\n      [SamplingDate],\n      [UserEditSampling],\n      [EditSamplingDate],\n      [UserSend],\n      [SendDate],\n      [Receiver],\n      [ReceivedDate],\n      [UserEditReceived],\n      [EditReceivedDate],\n      [AnalysisDue],\n      [UserEditAnalysisDue],\n      [EditAnalysisDueDate],\n      [UserReject],\n      [RejectDate],\n      [RemarkReject],\n      [UserListItem],\n      [ListItemDate],\n      [UserAnalysis],\n      [AnalysisDate],\n      [Picture],\n      [Report_Graph],\n      [Result_1],\n      [Result_2],\n      [Result_3],\n      [Result_4],\n      [Result_5],\n      [Result_6],\n      [Result_7],\n      [Result_8],\n      [ResultApprove],\n      [ItemApprover],\n      [ItemApproveDate],\n      [RemarkItemApprover],\n      [ReportApprover],\n      [ReportApproveDate],\n      [RemarkReportApprover]\n  FROM [QO].[dbo].[Request]\n  WHERE UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) IN (N'APPROVE ITEM', N'REQUEST RECONFIRM', N'REQ RECONFIRM')\n  ORDER BY [AnalysisDue], [SampleCode];\n  "
+    }
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-09-11 16:51:54",
+  "level": "ERROR",
+  "message": "Database query failed",
+  "data": {
+    "error": {
+      "message": "Invalid column name 'Type'.",
+      "stack": "RequestError: Invalid column name 'Type'.\n    at handleError (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\mssql\\lib\\tedious\\request.js:388:15)\n    at Connection.emit (node:events:524:28)\n    at Connection.emit (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\connection.js:1071:18)\n    at Parser.<anonymous> (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\connection.js:1176:12)\n    at Parser.emit (node:events:524:28)\n    at Readable.<anonymous> (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:27:14)\n    at Readable.emit (node:events:524:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:538:3)\n    at Readable.push (node:internal/streams/readable:393:5)",
+      "name": "RequestError"
+    },
+    "context": {
+      "query": "\n  SELECT [Id],\n      [ReqNo],\n      [SampleCode],\n      [RequestStatus],\n      [SampleStatus],\n      [ItemStatus],\n      [CustFull],\n      [CustShort],\n      [SampleNo],\n      [SampleName],\n      [Furnance],\n      [Instrument],\n      [ItemNo],\n      [ItemName],\n      [ReportName],\n      [TestCondition],\n      [NewOil],\n      [Min],\n      [Max],\n      [Remark],\n      [FormatReport],\n      [Criteria_B-],\n      [Criteria_A],\n      [Criteria_B+],\n      [ReqSection],\n      [ReqDate],\n      [ReqUser],\n      [Type],\n      [SamplingDate],\n      [UserEditSampling],\n      [EditSamplingDate],\n      [UserSend],\n      [SendDate],\n      [Receiver],\n      [ReceivedDate],\n      [UserEditReceived],\n      [EditReceivedDate],\n      [AnalysisDue],\n      [UserEditAnalysisDue],\n      [EditAnalysisDueDate],\n      [UserReject],\n      [RejectDate],\n      [RemarkReject],\n      [UserListItem],\n      [ListItemDate],\n      [UserAnalysis],\n      [AnalysisDate],\n      [Picture],\n      [Report_Graph],\n      [Result_1],\n      [Result_2],\n      [Result_3],\n      [Result_4],\n      [Result_5],\n      [Result_6],\n      [Result_7],\n      [Result_8],\n      [ResultApprove],\n      [ItemApprover],\n      [ItemApproveDate],\n      [RemarkItemApprover],\n      [ReportApprover],\n      [ReportApproveDate],\n      [RemarkReportApprover]\n  FROM [QO].[dbo].[Request]\n  WHERE [ItemStatus] IN (N'FINISH ITEM', N'FINISH RECHECK 1', N'FINISH RECHECK 2', N'FINISH RECONFIRM')\n  ORDER BY [AnalysisDue], [SampleCode], [ItemNo];\n  "
+    }
+  }
+}
+--------------------------------------------------
+{
+  "timestamp": "2026-09-11 16:52:11",
+  "level": "ERROR",
+  "message": "Database query failed",
+  "data": {
+    "error": {
+      "message": "Invalid column name 'Type'.",
+      "stack": "RequestError: Invalid column name 'Type'.\n    at handleError (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\mssql\\lib\\tedious\\request.js:388:15)\n    at Connection.emit (node:events:524:28)\n    at Connection.emit (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\connection.js:1071:18)\n    at Parser.<anonymous> (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\connection.js:1176:12)\n    at Parser.emit (node:events:524:28)\n    at Readable.<anonymous> (C:\\Users\\auto\\Desktop\\QO\\QO-BACK\\node_modules\\tedious\\lib\\token\\token-stream-parser.js:27:14)\n    at Readable.emit (node:events:524:28)\n    at addChunk (node:internal/streams/readable:561:12)\n    at readableAddChunkPushObjectMode (node:internal/streams/readable:538:3)\n    at Readable.push (node:internal/streams/readable:393:5)",
+      "name": "RequestError"
+    },
+    "context": {
+      "query": "\n  SELECT [Id],\n      [ReqNo],\n      [SampleCode],\n      [RequestStatus],\n      [SampleStatus],\n      [ItemStatus],\n      [CustFull],\n      [CustShort],\n      [SampleNo],\n      [SampleName],\n      [Furnance],\n      [Instrument],\n      [ItemNo],\n      [ItemName],\n      [ReportName],\n      [TestCondition],\n      [NewOil],\n      [Min],\n      [Max],\n      [Remark],\n      [FormatReport],\n      [Criteria_B-],\n      [Criteria_A],\n      [Criteria_B+],\n      [ReqSection],\n      [ReqDate],\n      [ReqUser],\n      [Type],\n      [SamplingDate],\n      [UserEditSampling],\n      [EditSamplingDate],\n      [UserSend],\n      [SendDate],\n      [Receiver],\n      [ReceivedDate],\n      [UserEditReceived],\n      [EditReceivedDate],\n      [AnalysisDue],\n      [UserEditAnalysisDue],\n      [EditAnalysisDueDate],\n      [UserReject],\n      [RejectDate],\n      [RemarkReject],\n      [UserListItem],\n      [ListItemDate],\n      [UserAnalysis],\n      [AnalysisDate],\n      [Picture],\n      [Report_Graph],\n      [Result_1],\n      [Result_2],\n      [Result_3],\n      [Result_4],\n      [Result_5],\n      [Result_6],\n      [Result_7],\n      [Result_8],\n      [ResultApprove],\n      [ItemApprover],\n      [ItemApproveDate],\n      [RemarkItemApprover],\n      [ReportApprover],\n      [ReportApproveDate],\n      [RemarkReportApprover]\n  FROM [QO].[dbo].[Request]\n  WHERE [ItemStatus] IN (N'FINISH ITEM', N'FINISH RECHECK 1', N'FINISH RECHECK 2', N'FINISH RECONFIRM')\n  ORDER BY [AnalysisDue], [SampleCode], [ItemNo];\n  "
+    }
+  }
+}
+--------------------------------------------------

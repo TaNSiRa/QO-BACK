@@ -577,6 +577,7 @@ router.post('/QO/CreateRequest', async (req, res) => {
 
   try {
     const { items, user_name, user_section } = req.body;
+    const requestType = req.body.Type ?? req.body.type;
     const now = ISOToLocal(new Date());
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -647,6 +648,7 @@ router.post('/QO/CreateRequest', async (req, res) => {
       pushField("ReqSection", user_section);
       pushField("ReqDate", now);
       pushField("ReqUser", user_name);
+      pushField("Type", _qoRequestType(item.Type ?? requestType));
       pushField("CustFull", item.CustFull);
       pushField("CustShort", item.CustShort);
       pushField("SampleNo", item.SampleNo);
@@ -701,6 +703,7 @@ router.post('/QO/CreateRequest', async (req, res) => {
         CustShort: first.CustShort || '',
         Furnance: first.Furnance || '',
         SamplingDate: first.SamplingDate || '',
+        Type: _qoRequestType(first.Type ?? requestType) || '',
       };
     });
 
@@ -1512,6 +1515,8 @@ router.post('/QO/getReqList', async (req, res) => {
         SELECT
           [ReqNo],
           MAX([CustFull]) AS [CustFull],
+          MAX([ReqUser]) AS [ReqUser],
+          MAX([Type]) AS [Type],
           MIN([SamplingDate]) AS [SamplingDate],
           MIN([ReceivedDate]) AS [ReceivedDate],
           MAX([Receiver]) AS [Receiver],
@@ -1549,6 +1554,8 @@ router.post('/QO/getReqList', async (req, res) => {
       SELECT
         RequestGroup.[ReqNo],
         RequestGroup.[CustFull],
+        RequestGroup.[ReqUser],
+        RequestGroup.[Type],
         RequestGroup.[SamplingDate],
         RequestGroup.[ReceivedDate],
         RequestGroup.[Receiver],
@@ -3466,6 +3473,7 @@ router.post('/QO/KPI', async (req, res) => {
   // Working-day / out-due metrics still only count once the report is approved
   // (guarded below), so received-but-not-complete requests contribute their
   // sample amount and cost immediately.
+  // แถวเก่าที่ยังไม่มี [Type] ถูกตัดออกทั้งหมด (ไม่นำมาคำนวณ)
   const query = `
     SELECT *
     FROM [QO].[dbo].[Request]
@@ -3474,107 +3482,107 @@ router.post('/QO/KPI', async (req, res) => {
       AND UPPER(LTRIM(RTRIM(ISNULL(RequestStatus, N'')))) NOT IN (N'REJECT', N'CANCEL')
       AND UPPER(LTRIM(RTRIM(ISNULL(SampleStatus, N'')))) NOT IN (N'REJECT', N'CANCEL')
       AND UPPER(LTRIM(RTRIM(ISNULL(ItemStatus, N'')))) NOT IN (N'REJECT', N'CANCEL')
+      AND ${_qoTypeFilterSql()}
   `;
 
   const db = await mssql.qurey(query);
+  const records = db['recordset'] || [];
 
-  if (!db['recordset'] || db['recordset'].length === 0) {
-    return res.status(400).json({ message: 'ไม่พบข้อมูล' });
-  }
-
-  const records = db['recordset'];
-
-  // ── 1. Initialise monthly buckets (1–12) ─────────────────
-  const monthly = {};
-  for (let m = 1; m <= 12; m++) {
-    monthly[m] = {
-      month: m,
-      sampleAmount: 0, // unique SampleCode across all ReqNo in the month
-      workingDay: 0,   // sum of working-day spans per ReqNo
-      outDue: 0,       // items where ReportApproveDate > AnalysisDue
-      cost: 0,         // sum of item cost
-    };
-  }
-
-  // ── 2. Group all rows by ReqNo ───────────────────────────
-  const byReqNo = {};
-  for (const row of records) {
-    if (!byReqNo[row.ReqNo]) byReqNo[row.ReqNo] = [];
-    byReqNo[row.ReqNo].push(row);
-  }
-
-  // ── 3. Process each ReqNo ────────────────────────────────
-  for (const [, items] of Object.entries(byReqNo)) {
-    // Determine which month this ReqNo belongs to
-    // → use the earliest ReceivedDate among all items
-    const receivedDates = items
-      .filter((i) => i.ReceivedDate)
-      .map((i) => new Date(i.ReceivedDate).getTime());
-
-    if (receivedDates.length === 0) continue;
-
-    const minReceived = new Date(Math.min(...receivedDates) - 7 * 60 * 60 * 1000);
-    const month = minReceived.getMonth() + 1; // 1-based
-
-    // ── Sample amount: count unique SampName in this ReqNo ──
-    const uniqueSampleCodes = new Set(items.map((i) => i.SampleCode).filter(Boolean));
-    monthly[month].sampleAmount += uniqueSampleCodes.size;
-    monthly[month].cost += items.reduce((sum, item) => sum + parseCost(item.Cost), 0);
-
-    // ── Working day: minReceivedDate → maxReportApproveDate ──
-    const reportDates = items
-      .filter((i) => i.ReportApproveDate)
-      .map((i) => new Date(i.ReportApproveDate).getTime());
-
-    if (reportDates.length > 0) {
-      const maxReport = new Date(Math.max(...reportDates) - 7 * 60 * 60 * 1000);
-      monthly[month]._wdSum = (monthly[month]._wdSum || 0) + countWorkingDays(minReceived, maxReport);
-      monthly[month]._wdCount = (monthly[month]._wdCount || 0) + 1;
-      // console.log(monthly[month]._wdCount);
+  // สรุป KPI รายเดือนของแถวชุดเดียว (ใช้ซ้ำทั้ง Special และ Service lab)
+  const summarise = (rows) => {
+    const monthly = {};
+    for (let m = 1; m <= 12; m++) {
+      monthly[m] = {
+        month: m,
+        sampleAmount: 0, // unique SampleCode across all ReqNo in the month
+        workingDay: 0,   // sum of working-day spans per ReqNo
+        outDue: 0,       // items where ReportApproveDate > AnalysisDue
+        cost: 0,         // sum of item cost
+      };
     }
 
-    // ── Out due: ใช้ AnalysisDue ที่มากที่สุดของ ReqNo ──
+    // ── Group all rows by ReqNo ───────────────────────────
+    const byReqNo = {};
+    for (const row of rows) {
+      if (!byReqNo[row.ReqNo]) byReqNo[row.ReqNo] = [];
+      byReqNo[row.ReqNo].push(row);
+    }
 
-    // หา Max AnalysisDue ของ ReqNo นี้
-    const dueDates = items
-      .filter((i) => i.AnalysisDue)
-      .map((i) => new Date(i.AnalysisDue).getTime());
+    // ── Process each ReqNo ────────────────────────────────
+    for (const [, items] of Object.entries(byReqNo)) {
+      // Determine which month this ReqNo belongs to
+      // → use the earliest ReceivedDate among all items
+      const receivedDates = items
+        .filter((i) => i.ReceivedDate)
+        .map((i) => new Date(i.ReceivedDate).getTime());
 
-    const maxDueDate =
-      dueDates.length > 0
-        ? new Date(Math.max(...dueDates) - 7 * 60 * 60 * 1000)
-        : null;
+      if (receivedDates.length === 0) continue;
 
-    // หา Max ReportApproveDate
-    const approveDates = items
-      .filter((i) => i.ReportApproveDate)
-      .map((i) => new Date(i.ReportApproveDate).getTime());
+      const minReceived = new Date(Math.min(...receivedDates) - 7 * 60 * 60 * 1000);
+      const month = minReceived.getMonth() + 1; // 1-based
 
-    const maxApproveDate =
-      approveDates.length > 0
-        ? new Date(Math.max(...approveDates) - 7 * 60 * 60 * 1000)
-        : null;
+      // ── Sample amount: count unique SampleCode in this ReqNo ──
+      const uniqueSampleCodes = new Set(items.map((i) => i.SampleCode).filter(Boolean));
+      monthly[month].sampleAmount += uniqueSampleCodes.size;
+      monthly[month].cost += items.reduce((sum, item) => sum + parseCost(item.Cost), 0);
 
-    if (maxDueDate && maxApproveDate) {
-      // ตัดเวลาออก
-      maxDueDate.setHours(0, 0, 0, 0);
-      maxApproveDate.setHours(0, 0, 0, 0);
+      // ── Working day: minReceivedDate → maxReportApproveDate ──
+      const reportDates = items
+        .filter((i) => i.ReportApproveDate)
+        .map((i) => new Date(i.ReportApproveDate).getTime());
 
-      if (maxApproveDate > maxDueDate) {
-        monthly[month].outDue += 1;
+      if (reportDates.length > 0) {
+        const maxReport = new Date(Math.max(...reportDates) - 7 * 60 * 60 * 1000);
+        monthly[month]._wdSum = (monthly[month]._wdSum || 0) + countWorkingDays(minReceived, maxReport);
+        monthly[month]._wdCount = (monthly[month]._wdCount || 0) + 1;
+      }
+
+      // ── Out due: ใช้ AnalysisDue ที่มากที่สุดของ ReqNo ──
+      const dueDates = items
+        .filter((i) => i.AnalysisDue)
+        .map((i) => new Date(i.AnalysisDue).getTime());
+
+      const maxDueDate =
+        dueDates.length > 0
+          ? new Date(Math.max(...dueDates) - 7 * 60 * 60 * 1000)
+          : null;
+
+      const approveDates = items
+        .filter((i) => i.ReportApproveDate)
+        .map((i) => new Date(i.ReportApproveDate).getTime());
+
+      const maxApproveDate =
+        approveDates.length > 0
+          ? new Date(Math.max(...approveDates) - 7 * 60 * 60 * 1000)
+          : null;
+
+      if (maxDueDate && maxApproveDate) {
+        // ตัดเวลาออก
+        maxDueDate.setHours(0, 0, 0, 0);
+        maxApproveDate.setHours(0, 0, 0, 0);
+
+        if (maxApproveDate > maxDueDate) {
+          monthly[month].outDue += 1;
+        }
       }
     }
+
+    // ── Compute average workingDay per month ──────────────
+    return Object.values(monthly)
+      .sort((a, b) => a.month - b.month)
+      .map(({ _wdSum, _wdCount, ...m }) => ({
+        ...m,
+        workingDay: _wdCount > 0 ? parseFloat((_wdSum / _wdCount).toFixed(2)) : 0,
+        cost: parseFloat((m.cost || 0).toFixed(2)),
+      }));
+  };
+
+  const byType = {};
+  for (const type of QO_REQUEST_TYPES) {
+    byType[type] = summarise(records.filter((row) => _qoRequestType(row.Type) === type));
   }
-  // ── 4. Compute average workingDay per month, then return ─
-  const result = Object.values(monthly)
-    .sort((a, b) => a.month - b.month)
-    .map(({ _wdSum, _wdCount, ...m }) => ({
-      ...m,
-      workingDay: _wdCount > 0 ? parseFloat((_wdSum / _wdCount).toFixed(2)) : 0,
-      cost: parseFloat((m.cost || 0).toFixed(2)),
-    }));
-  // console.log(result);
-  return res.status(200).json(result);
+
+  return res.status(200).json({ types: QO_REQUEST_TYPES, byType });
 });
 
 router.post('/QO/KPIItem', async (req, res) => {
@@ -3601,13 +3609,17 @@ router.post('/QO/KPIItem', async (req, res) => {
       .filter((column) => column.instrument)
       .map((column) => [column.instrument.toUpperCase(), column.key])
   );
-  const monthly = {};
-  for (let m = 1; m <= 12; m++) {
-    monthly[m] = { month: m, counts: {} };
-    for (const column of columns) {
-      monthly[m].counts[column.key] = 0;
+
+  const emptyMonthly = () => {
+    const monthly = {};
+    for (let m = 1; m <= 12; m++) {
+      monthly[m] = { month: m, counts: {} };
+      for (const column of columns) {
+        monthly[m].counts[column.key] = 0;
+      }
     }
-  }
+    return monthly;
+  };
 
   const monthFromDate = (value) => {
     if (!value) return null;
@@ -3617,26 +3629,40 @@ router.post('/QO/KPIItem', async (req, res) => {
   };
 
   try {
+    // แถวเก่าที่ยังไม่มี [Type] ถูกตัดออกทั้งหมด (ไม่นำมาคำนวณ)
     const requestQuery = `
       SELECT
         [ReqNo],
         [SampleCode],
         [SampleStatus],
         [Instrument],
-        [ReceivedDate]
+        [ReceivedDate],
+        [Type]
       FROM [QO].[dbo].[Request]
       WHERE YEAR([ReceivedDate]) = ${year}
         AND [ReceivedDate] IS NOT NULL
         AND UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
         AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
         AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
+        AND ${_qoTypeFilterSql()}
     `;
 
     const db = await mssql.qurey(requestQuery);
-    const reportSampleByKey = new Map();
+
+    // นับแยกทีละ Type โดยใช้ตรรกะเดิมทุกอย่าง
+    const monthlyByType = {};
+    const reportSampleByType = {};
+    for (const type of QO_REQUEST_TYPES) {
+      monthlyByType[type] = emptyMonthly();
+      reportSampleByType[type] = new Map();
+    }
 
     for (const row of db.recordset || []) {
+      const type = _qoRequestType(row.Type);
+      if (!type) continue;
+
       const month = monthFromDate(row.ReceivedDate);
+      const monthly = monthlyByType[type];
       if (!month || !monthly[month]) continue;
 
       const instrumentKey = instrumentToKey.get((row.Instrument || '').trim().toUpperCase());
@@ -3649,17 +3675,23 @@ router.post('/QO/KPIItem', async (req, res) => {
       const sampleCode = (row.SampleCode || '').trim();
       if (sampleStatus === 'COMPLETE' && reqNo && sampleCode) {
         const reportKey = `${month}|${reqNo}|${sampleCode}`;
-        reportSampleByKey.set(reportKey, month);
+        reportSampleByType[type].set(reportKey, month);
       }
     }
 
-    for (const month of reportSampleByKey.values()) {
-      monthly[month].counts.report += 2;
+    const byType = {};
+    for (const type of QO_REQUEST_TYPES) {
+      const monthly = monthlyByType[type];
+      for (const month of reportSampleByType[type].values()) {
+        monthly[month].counts.report += 2;
+      }
+      byType[type] = Object.values(monthly).sort((a, b) => a.month - b.month);
     }
 
     return res.status(200).json({
       columns: columns.map(({ key, label }) => ({ key, label })),
-      monthlyData: Object.values(monthly).sort((a, b) => a.month - b.month),
+      types: QO_REQUEST_TYPES,
+      byType,
     });
   } catch (err) {
     console.error(err);
@@ -3699,8 +3731,9 @@ router.post('/QO/KPIItemByCustomer', async (req, res) => {
       }
       return monthly;
     };
-    const byCustomer = new Map();
 
+    // ลูกค้าทุกรายจาก MasterPattern ต้องมีแถวอยู่เสมอในทุก Type แม้ยอดจะเป็น 0
+    const masterCustomerNames = [];
     const masterCustomerQuery = `
       SELECT DISTINCT LTRIM(RTRIM([CustFull])) AS [CustFull]
       FROM [QO].[dbo].[MasterPattern]
@@ -3711,40 +3744,51 @@ router.post('/QO/KPIItemByCustomer', async (req, res) => {
     const masterCustomerDb = await mssql.qurey(masterCustomerQuery);
     for (const row of masterCustomerDb.recordset || []) {
       const customerName = (row.CustFull || '').toString().trim();
-      if (!customerName || byCustomer.has(customerName)) continue;
-      byCustomer.set(customerName, {
-        customerName,
-        monthly: emptyMonthly(),
-      });
+      if (customerName && !masterCustomerNames.includes(customerName)) {
+        masterCustomerNames.push(customerName);
+      }
+    }
+
+    const byTypeCustomers = {};
+    for (const type of QO_REQUEST_TYPES) {
+      const byCustomer = new Map();
+      for (const customerName of masterCustomerNames) {
+        byCustomer.set(customerName, { customerName, monthly: emptyMonthly() });
+      }
+      byTypeCustomers[type] = byCustomer;
     }
 
     // Count every received request (ReceivedDate set) for the year as soon as it
     // is received, instead of waiting until all of its items reach COMPLETE.
+    // แถวเก่าที่ยังไม่มี [Type] ถูกตัดออกทั้งหมด (ไม่นำมาคำนวณ)
     const requestQuery = `
       SELECT
         R.[CustFull],
         R.[ReceivedDate],
-        R.[Cost]
+        R.[Cost],
+        R.[Type]
       FROM [QO].[dbo].[Request] R
       WHERE YEAR(R.[ReceivedDate]) = ${year}
         AND R.[ReceivedDate] IS NOT NULL
         AND UPPER(LTRIM(RTRIM(ISNULL(R.[RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
         AND UPPER(LTRIM(RTRIM(ISNULL(R.[SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
         AND UPPER(LTRIM(RTRIM(ISNULL(R.[ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
+        AND ${_qoTypeFilterSql('R')}
     `;
 
     const db = await mssql.qurey(requestQuery);
 
     for (const row of db.recordset || []) {
+      const type = _qoRequestType(row.Type);
+      if (!type) continue;
+
       const customerName = (row.CustFull || '').toString().trim() || '-';
       const rowMonth = monthFromDate(row.ReceivedDate);
       if (!rowMonth) continue;
 
+      const byCustomer = byTypeCustomers[type];
       if (!byCustomer.has(customerName)) {
-        byCustomer.set(customerName, {
-          customerName,
-          monthly: emptyMonthly(),
-        });
+        byCustomer.set(customerName, { customerName, monthly: emptyMonthly() });
       }
 
       const customer = byCustomer.get(customerName);
@@ -3752,29 +3796,34 @@ router.post('/QO/KPIItemByCustomer', async (req, res) => {
       customer.monthly[rowMonth].cost += parseCost(row.Cost);
     }
 
-    const exportRows = Array.from(byCustomer.values())
-      .sort((a, b) => a.customerName.localeCompare(b.customerName))
-      .map((customer) => {
-        const monthly = {};
-        for (let m = 1; m <= 12; m++) {
-          monthly[m] = {
-            item: customer.monthly[m].item,
-            cost: parseFloat(customer.monthly[m].cost.toFixed(2)),
+    const byType = {};
+    for (const type of QO_REQUEST_TYPES) {
+      const exportRows = Array.from(byTypeCustomers[type].values())
+        .sort((a, b) => a.customerName.localeCompare(b.customerName))
+        .map((customer) => {
+          const monthly = {};
+          for (let m = 1; m <= 12; m++) {
+            monthly[m] = {
+              item: customer.monthly[m].item,
+              cost: parseFloat(customer.monthly[m].cost.toFixed(2)),
+            };
+          }
+          return {
+            customerName: customer.customerName,
+            monthly,
           };
-        }
-        return {
-          customerName: customer.customerName,
-          monthly,
-        };
-      });
+        });
 
-    const systemRows = exportRows.map((row) => ({
-      customerName: row.customerName,
-      item: row.monthly[month]?.item || 0,
-      cost: row.monthly[month]?.cost || 0,
-    }));
+      const systemRows = exportRows.map((row) => ({
+        customerName: row.customerName,
+        item: row.monthly[month]?.item || 0,
+        cost: row.monthly[month]?.cost || 0,
+      }));
 
-    return res.status(200).json({ systemRows, exportRows });
+      byType[type] = { systemRows, exportRows };
+    }
+
+    return res.status(200).json({ types: QO_REQUEST_TYPES, byType });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server Error', error: err.message });
@@ -3989,6 +4038,28 @@ function _esc(str) {
   return String(str).replace(/'/g, "''");
 }
 
+// ── Request Type ('Special' / 'Service lab') ────────────────────────────────
+// เก็บใน [QO].[dbo].[Request].[Type] (ดู sql/add_type_column.sql)
+// แถวเก่าที่ยังไม่มีค่า Type จะเป็น NULL และไม่ถูกนำมาคำนวณในหน้า Summary
+const QO_REQUEST_TYPES = ['Special', 'Service lab'];
+
+/** คืนค่า Type ที่สะกดตรงตามมาตรฐาน หรือ null ถ้าไม่รู้จัก */
+function _qoRequestType(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return null;
+  const normalized = text.toLowerCase().replace(/[^a-z]/g, '');
+  for (const type of QO_REQUEST_TYPES) {
+    if (type.toLowerCase().replace(/[^a-z]/g, '') === normalized) return type;
+  }
+  return null;
+}
+
+/** WHERE ที่ตัดแถวเก่า (Type ว่าง/NULL) ออกจากการคำนวณ Summary */
+function _qoTypeFilterSql(alias = '') {
+  const prefix = alias ? `${_sqlIdentifier(alias)}.` : '';
+  return `${prefix}[Type] IS NOT NULL AND LTRIM(RTRIM(${prefix}[Type])) <> N''`;
+}
+
 function _sqlIdentifier(str) {
   return `[${String(str).replace(/]/g, ']]')}]`;
 }
@@ -4028,6 +4099,7 @@ function _qoRequestStructureColumns(alias = '') {
     'ReqSection',
     'ReqDate',
     'ReqUser',
+    'Type',
     'SamplingDate',
     'UserEditSampling',
     'EditSamplingDate',
