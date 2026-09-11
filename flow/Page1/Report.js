@@ -785,7 +785,9 @@ async function qoDrawResultPage(doc, sampleRows, options = {}) {
   const displaySamples = qoPadHistorySamples(history.samples, historyColumnCount);
   const tableY = 190;
   const maxTableW = PAGE_W - 80;
-  const fixedW = [170, 74, 82, 92];
+  // Control Range ถูกบีบให้แคบลง เพื่อยกความกว้างที่เหลือไปให้คอลัมน์ Sampling date
+  // ให้พอแสดงวันที่เต็ม (เช่น 31/10/2025) โดยไม่โดนตัดเป็น ...
+  const fixedW = [170, 74, 82, 64];
   const fixedTotalW = fixedW.reduce((sum, value) => sum + value, 0);
   const format1HistoryW = (maxTableW - fixedTotalW) / 7;
   const historyW = isFormat1 ? format1HistoryW : 105;
@@ -834,9 +836,12 @@ async function qoDrawResultPage(doc, sampleRows, options = {}) {
     x += fixedW[3];
     for (const sample of displaySamples) {
       const key = `${sample.SampleCode}|${item.ItemName}`;
-      const value = isPreview
+      const rawValue = isPreview
         ? ''
         : (sample.current ? qoResultText(item) : (history.values.get(key) || ''));
+      // คอลัมน์ที่มีการเก็บตัวอย่างจริงแต่ไม่มีผลของ item นั้น ให้แสดง "-"
+      // ส่วนคอลัมน์เปล่าที่เติมให้ครบ 7 ช่อง ปล่อยว่างไว้เหมือนเดิม
+      const value = (!isPreview && !sample.blank && String(rawValue).trim() === '') ? '-' : rawValue;
       qoCell(doc, x, y, historyW, rowH, value, {
         bg: sample.current ? '#DDEBF7' : null,
         align: 'center',
@@ -1010,6 +1015,7 @@ function qoPadHistorySamples(samples, desiredCount) {
     SampleCode: `__blank_${index}`,
     SamplingDate: '',
     current: false,
+    blank: true,
   }));
   return current ? [...previous, current, ...blanks] : [...previous, ...blanks];
 }
