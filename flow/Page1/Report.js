@@ -662,10 +662,12 @@ function qoBuildComments(items) {
     const result = qoNumber(item.ResultApprove);
     if (result === null) continue;
     const { lower, upper } = qoControlBounds(item);
+    // ใช้ชื่อเดียวกับคอลัมน์ TEST ITEM ในตาราง
+    const name = item.ReportName || item.ItemName;
     if (lower !== undefined && result < lower) {
-      comments.push(`${item.ItemName} is lower than Control Range`);
+      comments.push(`${name} is lower than Control Range`);
     } else if (upper !== undefined && result > upper) {
-      comments.push(`${item.ItemName} is higher than Control Range`);
+      comments.push(`${name} is higher than Control Range`);
     }
   }
   return comments.length ? [...new Set(comments)].join(', ') : '-';
