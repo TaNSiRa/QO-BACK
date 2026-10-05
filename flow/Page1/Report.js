@@ -868,11 +868,11 @@ async function qoDrawResultPage(doc, sampleRows, options = {}) {
 }
 
 // FormatReport = 3 : ตารางแบบ Control Criteria Ranking (ลูกค้าที่ส่ง criteria มาให้เอง)
-// คอลัมน์เรียงซ้ายไปขวาเป็น B- / A / B+ แต่หัวตารางในรายงานแสดงเป็น B / A / B ตามฟอร์มลูกค้า
+// คอลัมน์เรียงซ้ายไปขวาเป็น B- / A / B+ หัวตารางแสดงเป็น B⁻ / A / B⁺ (ตัวยก) ตามฟอร์มลูกค้า
 const QO_CRITERIA_COLUMNS = [
-  { key: 'Criteria_B-', header: 'B', rank: 'B' },
+  { key: 'Criteria_B-', header: 'B⁻', rank: 'B' },
   { key: 'Criteria_A', header: 'A', rank: 'A' },
-  { key: 'Criteria_B+', header: 'B', rank: 'B' },
+  { key: 'Criteria_B+', header: 'B⁺', rank: 'B' },
 ];
 
 function qoCriteriaText(item, key) {
