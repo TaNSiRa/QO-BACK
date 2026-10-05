@@ -868,11 +868,11 @@ async function qoDrawResultPage(doc, sampleRows, options = {}) {
 }
 
 // FormatReport = 3 : ตารางแบบ Control Criteria Ranking (ลูกค้าที่ส่ง criteria มาให้เอง)
-// คอลัมน์เรียงซ้ายไปขวาเป็น B- / A / B+ หัวตารางแสดงเป็น B⁻ / A / B⁺ (ตัวยก) ตามฟอร์มลูกค้า
+// คอลัมน์เรียงซ้ายไปขวาเป็น B- / A / B+ หัวตารางและช่อง Rank แสดงเป็น B⁻ / A / B⁺ (ตัวยก) ตามฟอร์มลูกค้า
 const QO_CRITERIA_COLUMNS = [
-  { key: 'Criteria_B-', header: 'B⁻', rank: 'B' },
+  { key: 'Criteria_B-', header: 'B⁻', rank: 'B⁻' },
   { key: 'Criteria_A', header: 'A', rank: 'A' },
-  { key: 'Criteria_B+', header: 'B⁺', rank: 'B' },
+  { key: 'Criteria_B+', header: 'B⁺', rank: 'B⁺' },
 ];
 
 function qoCriteriaText(item, key) {
@@ -900,7 +900,7 @@ function qoParseCriteriaRange(value) {
   return { lower: limit.value, upper: limit.value };
 }
 
-// Rank = ช่วง criteria ที่ผลตรวจตกอยู่ (ทั้ง B- และ B+ รายงานเป็น "B" เหมือนกัน)
+// Rank = ช่วง criteria ที่ผลตรวจตกอยู่ (B⁻ / A / B⁺)
 // ถ้าไม่อยู่ในช่วงไหนเลย หรือผลยังไม่เป็นตัวเลข ให้เป็น "-"
 function qoCriteriaRank(item, value) {
   const result = qoNumber(value);
