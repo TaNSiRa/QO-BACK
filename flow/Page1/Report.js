@@ -180,9 +180,12 @@ function qoRegisterFonts(doc) {
   if (fs.existsSync(fontThaiBold)) doc.registerFont('QO-Thai-Bold', fontThaiBold);
 }
 
+// item ที่ถูก cancel (รายตัว หรือทั้ง request) ไม่นำไปแสดงใน report
 function qoIsReportItemAllowed(item) {
-  const status = String(item?.RequestStatus || '').trim().toUpperCase();
-  return status !== 'REJECT' && status !== 'CANCEL';
+  const blocked = ['REJECT', 'CANCEL'];
+  const requestStatus = String(item?.RequestStatus || '').trim().toUpperCase();
+  const itemStatus = String(item?.ItemStatus || '').trim().toUpperCase();
+  return !blocked.includes(requestStatus) && !blocked.includes(itemStatus);
 }
 
 function parseDMYFull(str) {
@@ -707,6 +710,7 @@ async function qoLoadHistoryForSample(sampleRows, maxColumns) {
     WHERE [CustFull] = N'${qoEsc(first.CustFull)}'
       ${sampleNoFilter}
       AND UPPER(LTRIM(RTRIM(CONVERT(NVARCHAR(4000), [RequestStatus])))) = N'COMPLETE'
+      AND UPPER(LTRIM(RTRIM(ISNULL(CONVERT(NVARCHAR(4000), [ItemStatus]), N'')))) NOT IN (N'REJECT', N'CANCEL')
       AND [ItemName] IN (${itemNames.map((name) => `N'${qoEsc(name)}'`).join(', ')})
       AND NULLIF(LTRIM(RTRIM(CONVERT(NVARCHAR(4000), [SamplingDate]))), N'') IS NOT NULL
     ORDER BY TRY_CONVERT(DATE, [SamplingDate]) DESC, [SampleCode] DESC, [ItemNo];

@@ -776,10 +776,12 @@ router.post('/QO/sendSample', async (req, res) => {
     pushField("UserSend", req.body.UserSend);
     pushField("SendDate", now);
 
+    // item ที่ถูก cancel แล้วต้องคงสถานะ CANCEL ไว้ ไม่ถูกส่งต่อ
     let query = `
       UPDATE [QO].[dbo].[Request]
       SET ${fields.join(',\n')}
-      WHERE Id = '${data.Id}';
+      WHERE Id = '${data.Id}'
+        AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) <> N'CANCEL';
     `;
     allQueries += query + '\n';
   }
@@ -839,10 +841,12 @@ router.post('/QO/receiveSample', async (req, res) => {
     pushField("ReceivedDate", now);
     pushField("AnalysisDue", analysisDueDate);
 
+    // item ที่ถูก cancel แล้วต้องคงสถานะ CANCEL ไว้ ไม่ถูกรับเข้า
     let query = `
       UPDATE [QO].[dbo].[Request]
       SET ${fields.join(',\n')}
-      WHERE Id = '${data.Id}';
+      WHERE Id = '${data.Id}'
+        AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) <> N'CANCEL';
     `;
     allQueries += query + '\n';
   }
@@ -1424,7 +1428,7 @@ router.post('/QO/ReportApproveItems', async (req, res) => {
             FROM [QO].[dbo].[Request]
             WHERE [ReqNo] = N'${escapedReqNo}'
               AND [SampleCode] = N'${escapedSampleCode}'
-              AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) <> N'COMPLETE'
+              AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (N'COMPLETE', N'CANCEL', N'REJECT')
           );
       `;
     }
@@ -1447,6 +1451,7 @@ router.post('/QO/ReportApproveItems', async (req, res) => {
             SELECT 1
             FROM [QO].[dbo].[Request]
             WHERE [ReqNo] = N'${escapedReqNo}'
+              AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
               AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')
               AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) <> N'COMPLETE'
           );
@@ -3404,6 +3409,113 @@ router.post('/QO/cancelRequest', async (req, res) => {
     return res.status(200).json({ message: 'Cancel success', rowsAffected: affected });
   } catch (error) {
     console.error("QO cancelRequest Error:", error);
+    return res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+// Cancel ราย item จากหน้า Request list detail: item ที่เป็น Instrument เดียวกันใน Sample เดียวกัน
+// ถูก cancel ไปพร้อมกันทั้งหมด จากนั้นคำนวณ SampleStatus / RequestStatus ใหม่จาก item ที่ยังเหลืออยู่
+// (item ที่ CANCEL จะไม่ถูกนำไปออก report — ดู qoIsReportItemAllowed ใน Report.js)
+router.post('/QO/cancelItem', async (req, res) => {
+  console.log("--QO-cancelItem--");
+
+  try {
+    const reqNo = (req.body.ReqNo || '').toString().trim();
+    const sampleCode = (req.body.SampleCode || '').toString().trim();
+    const instrument = (req.body.Instrument || '').toString().trim();
+
+    if (!reqNo || !sampleCode || !instrument) {
+      return res.status(400).json({ message: 'Missing ReqNo / SampleCode / Instrument' });
+    }
+
+    const reqSql = `N'${_esc(reqNo)}'`;
+    const sampleSql = `N'${_esc(sampleCode)}'`;
+    const instrumentSql = `N'${_esc(instrument)}'`;
+    const activeItem = `UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')`;
+    const activeRequest = `UPPER(LTRIM(RTRIM(ISNULL([RequestStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')`;
+    const activeSample = `UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) NOT IN (N'REJECT', N'CANCEL')`;
+    const inSample = `[ReqNo] = ${reqSql} AND [SampleCode] = ${sampleSql}`;
+    const inRequest = `[ReqNo] = ${reqSql}`;
+
+    const query = `
+      SET XACT_ABORT ON;
+      BEGIN TRY
+        BEGIN TRANSACTION;
+
+        UPDATE [QO].[dbo].[Request]
+        SET [ItemStatus] = N'CANCEL'
+        WHERE ${inSample}
+          AND LTRIM(RTRIM(ISNULL([Instrument], N''))) = ${instrumentSql}
+          AND ${activeItem};
+
+        IF @@ROWCOUNT = 0
+          RAISERROR('No item to cancel', 16, 1);
+
+        -- Sample: cancel ครบทุก item -> CANCEL, item ที่เหลือ COMPLETE หมด -> COMPLETE,
+        -- item ที่เหลือรออนุมัติหมด -> WAIT APPROVE
+        IF NOT EXISTS (SELECT 1 FROM [QO].[dbo].[Request] WHERE ${inSample} AND ${activeItem})
+          UPDATE [QO].[dbo].[Request]
+          SET [SampleStatus] = N'CANCEL'
+          WHERE ${inSample};
+        ELSE IF NOT EXISTS (
+          SELECT 1 FROM [QO].[dbo].[Request]
+          WHERE ${inSample} AND ${activeItem}
+            AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) <> N'COMPLETE'
+        )
+          UPDATE [QO].[dbo].[Request]
+          SET [SampleStatus] = N'COMPLETE'
+          WHERE ${inSample} AND ${activeRequest};
+        ELSE IF NOT EXISTS (
+          SELECT 1 FROM [QO].[dbo].[Request]
+          WHERE ${inSample} AND ${activeItem}
+            AND UPPER(LTRIM(RTRIM(ISNULL([ItemStatus], N'')))) NOT IN (
+              N'FINISH ITEM', N'FINISH RECHECK 1', N'FINISH RECHECK 2', N'FINISH RECONFIRM',
+              N'APPROVE ITEM', N'COMPLETE'
+            )
+        )
+          UPDATE [QO].[dbo].[Request]
+          SET [SampleStatus] = N'WAIT APPROVE'
+          WHERE ${inSample} AND ${activeRequest};
+
+        -- Request: คิดจาก SampleStatus แบบเดียวกัน
+        IF NOT EXISTS (SELECT 1 FROM [QO].[dbo].[Request] WHERE ${inRequest} AND ${activeItem})
+          UPDATE [QO].[dbo].[Request]
+          SET [RequestStatus] = N'CANCEL'
+          WHERE ${inRequest};
+        ELSE IF NOT EXISTS (
+          SELECT 1 FROM [QO].[dbo].[Request]
+          WHERE ${inRequest} AND ${activeItem} AND ${activeSample}
+            AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) <> N'COMPLETE'
+        )
+          UPDATE [QO].[dbo].[Request]
+          SET [RequestStatus] = N'COMPLETE'
+          WHERE ${inRequest} AND ${activeRequest};
+        ELSE IF NOT EXISTS (
+          SELECT 1 FROM [QO].[dbo].[Request]
+          WHERE ${inRequest} AND ${activeItem} AND ${activeSample}
+            AND UPPER(LTRIM(RTRIM(ISNULL([SampleStatus], N'')))) NOT IN (N'WAIT APPROVE', N'COMPLETE')
+        )
+          UPDATE [QO].[dbo].[Request]
+          SET [RequestStatus] = N'WAIT APPROVE'
+          WHERE ${inRequest} AND ${activeRequest};
+
+        IF @@TRANCOUNT > 0
+          COMMIT TRANSACTION;
+      END TRY
+      BEGIN CATCH
+        IF XACT_STATE() <> 0
+          ROLLBACK TRANSACTION;
+        THROW;
+      END CATCH
+    `;
+
+    await mssql.qurey(query);
+    return res.status(200).json({ message: 'Cancel item success' });
+  } catch (error) {
+    console.error("QO cancelItem Error:", error);
+    if ((error.message || '').includes('No item to cancel')) {
+      return res.status(400).json({ message: 'No item to cancel' });
+    }
     return res.status(500).json({ message: error.message || 'Server error' });
   }
 });
